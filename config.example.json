@@ -1,0 +1,6 @@
+{
+  "token": "1238642344:SAGHJDFHDSGQHNZ621s7iYEu4OhYmMQXZf24", // FAKE TOKEN
+  "webhook": false,
+  "webhook_ip": "127.0.0.1",
+  "webhook_port": 8080
+}

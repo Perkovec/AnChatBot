@@ -1,0 +1,30 @@
+{
+  "name": "anchatbot",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/eslint index.js src/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Perkovec/AnChatBot.git"
+  },
+  "author": "Perkovec",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Perkovec/AnChatBot/issues"
+  },
+  "homepage": "https://github.com/Perkovec/AnChatBot#readme",
+  "devDependencies": {
+    "eslint": "^3.5.0",
+    "eslint-config-airbnb": "^11.1.0",
+    "eslint-plugin-import": "^1.15.0",
+    "eslint-plugin-jsx-a11y": "^2.2.2",
+    "eslint-plugin-react": "^6.2.2"
+  },
+  "dependencies": {
+    "superagent": "^2.2.0",
+    "winston": "^2.2.0"
+  }
+}
