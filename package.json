@@ -24,6 +24,9 @@
     "eslint-plugin-react": "^6.2.2"
   },
   "dependencies": {
+    "bitwise-xor": "0.0.0",
+    "msgpack-lite": "^0.1.20",
+    "msgpack5": "^3.4.0",
     "superagent": "^2.2.0",
     "winston": "^2.2.0"
   }

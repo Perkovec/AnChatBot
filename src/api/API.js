@@ -1,70 +1,80 @@
 const request = require('superagent');
-
+const Message = require('./message-model');
 
 class API {
   constructor(configs) {
     this.configs = configs;
     this.token = configs.token;
     this.logger = configs.logger;
-    this._apiURL = `https://api.telegram.org/bot${this.token}/`;
-    this._offset = 0;
-    this._listeners = {};
+    this.apiURL = `https://api.telegram.org/bot${this.token}/`;
+    this.offset = 0;
+    this.listeners = {};
   }
 
-  _callMethod(name, data) {
+  callMethod(name, data) {
     return new Promise((resolve, reject) => {
       request
-        .post(this._apiURL + name)
+        .post(this.apiURL + name)
         .send(data)
         .end((err, res) => {
           if (err) reject(err);
-          if (typeof(res.body) === 'object') {
+          if (res && typeof res.body === 'object') {
             if (res.body.ok) {
               resolve(res.body.result);
             } else {
-              this.logger.error(res.body.result);
-              reject(res.body.result);
+              this.logger.error(res.body);
+              reject(res.body);
             }
           } else {
-            this.logger.warn(res.body);
+            this.logger.error(res.body || 'no body');
             reject(res.body);
           }
         });
     });
   }
 
-  _polling() {
-    const onMessage = this._listeners.onMessage;
+  polling() {
+    const onMessage = this.listeners.onMessage;
     this.getUpdates({
-      offset: this._offset,
-    }).then(updates => {
+      offset: this.offset,
+    }).then((updates) => {
       if (onMessage) {
         for (const update of updates) {
-          onMessage(update.message);
+          onMessage(new Message(update.message, this));
         }
       }
       const lastUpdate = updates[updates.length - 1];
       if (lastUpdate) {
-        this._offset = lastUpdate.update_id + 1;
+        this.offset = lastUpdate.update_id + 1;
       }
-      this._polling();
+      this.polling();
     });
   }
 
-  onMessage(listener) {
-    this._listeners.onMessage = listener;
+  buildMethods() {
+    return {
+      sendMessage: this.sendMessage,
+    };
   }
-  
+
+  onMessage(listener) {
+    this.listeners.onMessage = listener;
+  }
+
   startPolling() {
     if (!this.configs.webhook) {
-      this._polling();
+      this.polling();
     } else {
-      console.log('Polling not enabled (webhook: true)');
+      console.log('Polling not enabled (webhook: true)'); // eslint-disable-line no-console
     }
   }
 
   getUpdates(data) {
-    return this._callMethod('getUpdates', data);
+    return this.callMethod('getUpdates', data);
+  }
+
+  sendMessage(data) {
+    return this.callMethod('sendMessage', data);
   }
 }
 

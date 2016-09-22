@@ -1,3 +1,6 @@
 node_modules
 .vscode
 config.json
+db/*.snap
+db/*.xlog
+logs/*.log
