@@ -27,6 +27,7 @@ class Connection {
     });
     this.state = states.INITED;
     this.commandsQueue = [];
+    this.namespace ={};
     this.msgpack = options.msgpack || msgpack;
     this.options = Object.assign(defaultOptions, options);
 
@@ -126,6 +127,148 @@ class Connection {
       this.$request(header, body);
     });
   }
+
+  insert(spaceId, tuple) {
+    const reqId = this.$getReqId();
+    return this.$replaceInsert(tConstants.RequestCode.rqInsert, reqId, spaceId, tuple);
+  }
+
+  select(spaceId, indexId, limit, offset, iterator, key) {
+    if (Number.isInteger(key))
+      key = [key];
+
+    return new Promise((resolve, reject) => {
+      if (typeof(spaceId) == 'string' || typeof(indexId) == 'string') {
+        return this.$getMetadata(spaceId, indexId)
+          .then(info => {
+            return this.select(info[0], info[1], limit, offset, iterator, key);
+          })
+          .then(resolve)
+          .catch(reject);
+        }
+        const reqId = this.$getReqId();
+        const header = this.$header(tConstants.RequestCode.rqSelect, reqId);
+        //don't need a key for all iterator
+        if (iterator == 'all')
+          key = [];
+
+        const buffered = {
+          spaceId: this.msgpack.encode(spaceId),
+          indexId:  this.msgpack.encode(indexId),
+          limit:  this.msgpack.encode(limit),
+          offset:  this.msgpack.encode(offset),
+          key:  this.msgpack.encode(key)
+        };
+
+        const body = Buffer.concat([
+            new Buffer([0x86, tConstants.KeysCode.space_id]), buffered.spaceId,
+            new Buffer([tConstants.KeysCode.index_id]), buffered.indexId,
+            new Buffer([tConstants.KeysCode.limit]), buffered.limit,
+            new Buffer([tConstants.KeysCode.offset]), buffered.offset,
+            new Buffer([tConstants.KeysCode.iterator, tConstants.IteratorsType[iterator],
+                tConstants.KeysCode.key]),
+            buffered.key
+        ]);
+        this.$request(header, body);
+        this.commandsQueue.push([tConstants.RequestCode.rqSelect, reqId, {resolve: resolve, reject: reject}]);
+    });
+};
+
+  $replaceInsert(cmd, reqId, spaceId, tuple) {
+    return new Promise((resolve, reject) => {
+      if (Array.isArray(tuple)){
+        if (typeof(spaceId)=='string') {
+          return this.$getMetadata(spaceId, 0)
+            .then(info => {
+                return this.$replaceInsert(cmd, reqId, info[0], tuple);
+            })
+            .then(resolve)
+            .catch(reject);
+        }
+        const header = this.$header(cmd, reqId);
+        const buffered = {
+          spaceId: this.msgpack.encode(spaceId),
+          tuple: this.msgpack.encode(tuple)
+        };
+        const body = Buffer.concat([new Buffer([0x82,tarantoolConstants.KeysCode.space_id]), buffered.spaceId,
+          new Buffer([tarantoolConstants.KeysCode.tuple]), buffered.tuple]);
+        this.$request(header, body);
+        this.commandsQueue.push([cmd, reqId, {resolve: resolve, reject: reject}]);
+      } else {
+        reject(new Error('need array'));
+      }
+    });
+  }
+
+  $getSpaceId(name) {
+    return this.select(tConstants.Space.space, tConstants.IndexSpace.name, 1, 0,
+      tConstants.IteratorsType.all, [name])
+      .then(value => {
+        if (value && value.length && value[0]) {
+          const spaceId = value[0][0];
+          this.namespace[name] = {
+            id: spaceId,
+            name: name,
+            indexes: {}
+          };
+          this.namespace[spaceId] = {
+            id: spaceId,
+            name: name,
+            indexes: {}
+          };
+          return spaceId;
+        } else {
+          throw new Error('Cannot read a space name or space is not defined');
+        }
+      });
+  };
+
+  $getIndexId(spaceId, indexName) {
+    return this.select(tConstants.Space.index, tConstants.IndexSpace.indexName, 1, 0,
+        tConstants.IteratorsType.all, [spaceId, indexName])
+        .then(value => {
+          if (value && value[0] && value[0].length > 1) {
+            const indexId = value[0][1];
+            const space = this.namespace[spaceId];
+            if (space) {
+              this.namespace[space.name].indexes[indexName] = indexId;
+              this.namespace[space.id].indexes[indexName] = indexId;
+            }
+            return indexId;
+          } else {
+            throw new Error('Cannot read a space name indexes or index is not defined');
+          }
+        });
+};
+
+
+  $getMetadata(spaceName, indexName) {
+    if (this.namespace[spaceName]) {
+      spaceName = this.namespace[spaceName].id;
+    }
+    if (typeof(this.namespace[spaceName]) != 'undefined' && typeof(this.namespace[spaceName].indexes[indexName]) != 'undefined') {
+      indexName = this.namespace[spaceName].indexes[indexName];
+    }
+    if (typeof(spaceName) == 'string' && typeof(indexName) == 'string') {
+      return this.$getSpaceId(spaceName)
+        .then(spaceId => {
+          return Promise.all([spaceId, this.$getIndexId(spaceId, indexName)]);
+        });
+    }
+    const promises = [];
+    if (typeof(spaceName) == 'string') {
+      promises.push(this.$getSpaceId(spaceName));
+    } else {
+      promises.push(spaceName);
+    }
+    if (typeof(indexName) == 'string') {
+      promises.push(this.$getIndexId(spaceName, indexName));
+    } else {
+      promises.push(indexName);
+    }
+
+    return Promise.all(promises);
+};
 
   $responseBufferTrack(buffer, length) {
     if (!length) {
