@@ -24,15 +24,10 @@ DBConnect.connect()
   
   return DBConnect.auth(config.tarantool_username, config.tarantool_password);
 })
-.then(() => console.log("lol"))
-
-/*
 .then(() => {
-  console.log('connected')
+  console.log('authed');
   const OnMsg = new MsgProcessor(API, DBConnect);
 
   API.onMessage(msg => OnMsg.process(msg));
   API.startPolling();
 });
-
-*/

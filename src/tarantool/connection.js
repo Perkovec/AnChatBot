@@ -169,10 +169,30 @@ class Connection {
                 tConstants.KeysCode.key]),
             buffered.key
         ]);
-        this.$request(header, body);
         this.commandsQueue.push([tConstants.RequestCode.rqSelect, reqId, {resolve: resolve, reject: reject}]);
+        this.$request(header, body);
     });
-};
+  }
+
+  call(functionName) {
+    const tuple = arguments.length > 1 ? Array.prototype.slice.call(arguments, 1): [];
+    return new Promise((resolve, reject) => {
+      const reqId = this.$getReqId();
+      const header = this.$header(tConstants.RequestCode.rqCall, reqId);
+      const buffered = {
+        functionName: this.msgpack.encode(functionName),
+        tuple: this.msgpack.encode(tuple ? tuple : [])
+      };
+      const body = Buffer.concat([
+        new Buffer([0x82,tConstants.KeysCode.function_name]),
+        buffered.functionName,
+        new Buffer([tConstants.KeysCode.tuple]),
+        buffered.tuple
+      ]);
+      this.commandsQueue.push([tConstants.RequestCode.rqCall, reqId, {resolve: resolve, reject: reject}]);
+      this.$request(header, body);
+    });
+  }
 
   $replaceInsert(cmd, reqId, spaceId, tuple) {
     return new Promise((resolve, reject) => {
@@ -221,7 +241,7 @@ class Connection {
           throw new Error('Cannot read a space name or space is not defined');
         }
       });
-  };
+  }
 
   $getIndexId(spaceId, indexName) {
     return this.select(tConstants.Space.index, tConstants.IndexSpace.indexName, 1, 0,
@@ -239,7 +259,7 @@ class Connection {
             throw new Error('Cannot read a space name indexes or index is not defined');
           }
         });
-};
+  }
 
 
   $getMetadata(spaceName, indexName) {
@@ -268,7 +288,7 @@ class Connection {
     }
 
     return Promise.all(promises);
-};
+  }
 
   $responseBufferTrack(buffer, length) {
     if (!length) {

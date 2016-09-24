@@ -4,3 +4,5 @@ config.json
 db/*.snap
 db/*.xlog
 logs/*.log
+tarantool_config.lua
+.tarantool_functions

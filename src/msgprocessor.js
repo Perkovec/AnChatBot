@@ -37,9 +37,13 @@ class MsgProcessor {
   }
 
   $start(msg) {
-    this.DB.select('anchat_users', 0, 1, 0, 'eq', [msg.from.id])
+    this.DB.select(512, 0, 1, 0, 'eq', [msg.from.id])
     .then((results) => {
       if (!results.length) {
+        console.log('dump');
+        this.DB.call('new_chat_user', {lol: "kek"}).then(result => {
+          console.log(result)
+        });
         //this.DB.insert(512, [msg.from.id, userGroups.NEWBIE, ]);
       }
     });
