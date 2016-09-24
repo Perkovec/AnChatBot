@@ -1,5 +1,5 @@
 const winston = require('winston');
-const TarantoolConnection = require('./src/tarantool/connection');
+const NodeCouchDb = require('node-couchdb');
 const TgAPI = require('./src/api/API');
 const config = require('./config.json');
 const MsgProcessor = require('./src/msgprocessor');
@@ -16,17 +16,11 @@ config.logger = logger;
 
 const API = new TgAPI(config);
 
+const couch = new NodeCouchDb();
 
-const DBConnect = new TarantoolConnection({port: 3301});
-DBConnect.connect()
-.then(() => {
-  console.log('connected');
-  
-  return DBConnect.auth(config.tarantool_username, config.tarantool_password);
-})
-.then(() => {
-  console.log('authed');
-  const OnMsg = new MsgProcessor(API, DBConnect);
+couch.uniqid(1000).then(ids => {
+  couch.ids = ids;
+  const OnMsg = new MsgProcessor(API, couch);
 
   API.onMessage(msg => OnMsg.process(msg));
   API.startPolling();

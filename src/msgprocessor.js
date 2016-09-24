@@ -22,31 +22,57 @@ class MsgProcessor {
     
     if (CRegex.start.test(text)) {
       this.$start(msg);
-      /*console.log(text);
-      try {
-      msg.sendMessage({
-        text: Util.format(local.start, [Nickname.generate(2)]),
-      });
-      } catch(e) {
-        console.log(e)
-      }*/
-      //try {
-      //this.DB.insert(512, [50, 10, 'my key', 30]).then(a => console.log(a), err => console.log(err));
-      //} catch(e) {console.log(e)}
+    } else {
+      this.broadcastMessage(msg);
     }
   }
 
+  broadcastMessage(msg) {
+    
+  }
+
   $start(msg) {
-    this.DB.select(512, 0, 1, 0, 'eq', [msg.from.id])
-    .then((results) => {
-      if (!results.length) {
-        console.log('dump');
-        this.DB.call('new_chat_user', {lol: "kek"}).then(result => {
-          console.log(result)
+    this.DB.get(
+      'anchat_users',
+      '_design/anchat_users/_view/by_tgid',
+      {key: msg.from.id})
+    .then(({data}) => {
+      const rows = data.rows;
+      if (!rows.length) {
+        this.DB.get('anchat_users', '_design/anchat_users/_view/count')
+        .then(({data}) => {
+          const nickname = Nickname.generate(2);
+          const length = (data.rows[0] && data.rows[0].value) || 0;
+          const msgTime = Math.floor(Date.now() / 1000);
+          this.DB.insert('anchat_users', {
+            _id: this.DB.ids[0],
+            tg_id: msg.from.id,
+            id: Util.numberToLetter(length + 1),
+            name: nickname,
+            achieves: '',
+            startDate: msgTime,
+            banned: false,
+            muted: false,
+            muteEndTime: 0,
+            isChatUser: true,
+            lastMessage: msgTime,
+            userGroup: userGroups.NEWBIE,
+            privateMsgs: '',
+            hidden: false
+          })
+          .then(({data}) => {
+            this.DB.ids = this.DB.ids.slice(1);
+            msg.sendMessage({
+              text: Util.format(local.start, [nickname]),
+            });
+          }, console.log);
+        })
+      } else {
+        msg.sendMessage({
+          text: local.already_in_chat,
         });
-        //this.DB.insert(512, [msg.from.id, userGroups.NEWBIE, ]);
       }
-    });
+    })
   }
 }
 

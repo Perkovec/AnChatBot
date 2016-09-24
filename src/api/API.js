@@ -26,7 +26,7 @@ class API {
               reject(res.body);
             }
           } else {
-            this.logger.error(res.body || 'no body');
+            this.logger.error((res && res.body) || 'no body');
             reject(res.body);
           }
         });

@@ -3,6 +3,9 @@
   "webhook": false,
   "webhook_ip": "127.0.0.1",
   "webhook_port": 8080,
-  "tarantool_username": "anchat",
-  "tarantool_password": "anchat"
+  "couchdb": {
+    "host": "localhost",
+    "port": "5984",
+    "database": "anchat_users"
+  }
 }
