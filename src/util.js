@@ -36,13 +36,13 @@ class Util {
     } else {
       const minutes = Math.floor(diff / 60);
       if (minutes < 60) {
-        text = `был ${minutes} мин. назад`;
+        text = `был(а) ${minutes} мин. назад`;
       } else {
         const hours = Math.floor(minutes / 60);
         if (hours < 24) {
-          text = `был ${hours} ч. назад`
+          text = `был(а) ${hours} ч. назад`
         } else {
-          text = `был ${Math.floor(hours / 24)} д. назад`
+          text = `был(а) ${Math.floor(hours / 24)} д. назад`
         }
       }
     }

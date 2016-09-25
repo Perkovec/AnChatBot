@@ -1,5 +1,6 @@
 const User = require('./user-model');
 const Chat = require('./chat-model');
+const Audio = require('./audio-model');
 
 class Message {
   constructor(msg, api) {
@@ -12,6 +13,7 @@ class Message {
     this.forward_date = msg.forward_date || null;
     this.reply_to_message = msg.reply_to_message !== undefined ? new Message(msg.reply_to_message, api) : null;
     this.edit_date = msg.edit_date || null;
+    this.audio = msg.audio !== undefined ? new Audio(msg.audio, api) : null;
 
     this.text = msg.text || null;
 

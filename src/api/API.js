@@ -56,6 +56,7 @@ class API {
   buildMethods() {
     return {
       sendMessage: this.sendMessage,
+      getFile: this.getFile
     };
   }
 
@@ -77,6 +78,14 @@ class API {
 
   sendMessage(data) {
     return this.callMethod('sendMessage', data);
+  }
+
+  sendAudio(data) {
+    return this.callMethod('sendAudio', data);
+  }
+
+  getFile(data) {
+    return this.callMethod('getFile', data);
   }
 }
 
