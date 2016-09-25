@@ -56,6 +56,20 @@ class Util {
         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
     });
   }
+
+  static truncate(text, n, useWordBoundary) {
+    const isTooLong = text.length > n;
+    let s_ = isTooLong ? text.substr(0, n - 1) : text;
+    s_ = (useWordBoundary && isTooLong) ? s_.substr(0, s_.lastIndexOf(' ')) : s_;
+    return  isTooLong ? s_ + '…' : s_;
+  }
+
+  static cutLines(text, lineCount) {
+    if (lineCount < 1) return text;
+    const lines = text.split('\n');
+    lines.splice(0, lineCount);
+    return lines.join('\n');
+  }
 }
 
 module.exports = Util;

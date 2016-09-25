@@ -40,7 +40,9 @@ class API {
     }).then((updates) => {
       if (onMessage) {
         for (const update of updates) {
-          onMessage(new Message(update.message, this));
+          if (update.message) {
+            onMessage(new Message(update.message, this));
+          }
         }
       }
       const lastUpdate = updates[updates.length - 1];

@@ -58,7 +58,20 @@ class MsgProcessor {
     .then(({isChatUser, UserData}) => {
       if (isChatUser) {
         const nickname = UserData.name;
-        const text = `${nickname}: ${msg.text}`;
+        let text = `${nickname}: ${msg.text}`;
+        if (msg.reply_to_message !== null) {
+          const reply = msg.reply_to_message;
+          let reply_msg;
+          if (reply.id === msg.from.id) {
+            reply_msg = `${nickname}: ${reply.text}`;
+          } else {
+            reply.text = reply.text.startsWith('В ответ на:') ? Util.cutLines(reply.text, 3) : reply.text;
+            reply_msg = reply.text;
+          }
+
+          reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
+          text = Util.format(local.reply_to, [reply_msg, text]);
+        }
         this.DB.get(
           'anchat_users',
           '_design/anchat_users/_view/by_isChatUser')
