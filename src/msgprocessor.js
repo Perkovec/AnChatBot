@@ -3,7 +3,8 @@ const Util = require('./util');
 const local = require('./locals/ru.json');
 const CRegex = {
   start: /^(\/start)$/i,
-  stop: /^(\/stop)$/i
+  stop: /^(\/stop)$/i,
+  list: /^(\/list)$/i
 };
 
 const userGroups = {
@@ -25,6 +26,8 @@ class MsgProcessor {
       this.$start(msg);
     } else if (CRegex.stop.test(text)) {
       this.$stop(msg);
+    } else if (CRegex.list.test(text)) {
+      this.$list(msg);
     } else {
       this.broadcastMessage(msg);
     }
@@ -48,18 +51,10 @@ class MsgProcessor {
   }
 
   broadcastMessage(msg) {
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_tgid',
-      {key: msg.from.id})
-    .then(({data}) => {
-      const rows = data.rows;
-      if (!rows.length || !rows[0].value.isChatUser) {
-        msg.sendMessage({
-          text: local.not_in_chat
-        });
-      } else {
-        const nickname = rows[0].value.name;
+    this.$checkUserInChat(msg.from.id)
+    .then(({isChatUser, UserData}) => {
+      if (isChatUser) {
+        const nickname = UserData.name;
         const text = `${nickname}: ${msg.text}`;
         this.DB.get(
           'anchat_users',
@@ -74,9 +69,14 @@ class MsgProcessor {
               });
             }
           }
+          this.$updateUserLastMessage(msg.from.id);
+        });
+      } else {
+        msg.sendMessage({
+          text: local.not_in_chat
         });
       }
-    })
+    });
   }
 
   $start(msg) {
@@ -91,7 +91,7 @@ class MsgProcessor {
         .then(({data}) => {
           const nickname = Nickname.generate(2);
           const length = (data.rows[0] && data.rows[0].value) || 0;
-          const msgTime = Math.floor(Date.now() / 1000);
+          const msgTime = Utils.UTCTime();
           this.DB.insert('anchat_users', {
             _id: this.$getUid(),
             tg_id: msg.from.id,
@@ -119,7 +119,8 @@ class MsgProcessor {
         const newData = Object.assign(rows[0].value, {
           _id: rows[0].id,
           _rev: rows[0].value._rev,
-          isChatUser: true
+          isChatUser: true,
+          lastMessage: Utils.UTCTime()
         });
         
         this.DB.update(
@@ -156,13 +157,79 @@ class MsgProcessor {
           'anchat_users',
           newData)
         .then(({data}) => {
-          console.log(data)
           msg.sendMessage({
             text: local.stop
           });
           this.broadcastPlaneMessage(Util.format(local.leave_chat, [rows[0].value.name]), msg.from.id);
         });
       }
+    });
+  }
+
+  $list(msg) {
+    this.$checkUserInChat(msg.from.id)
+    .then(({isChatUser}) => {
+      if (isChatUser) {
+        this.DB.get(
+          'anchat_users',
+          '_design/anchat_users/_view/by_isChatUser')
+        .then(({data}) => {
+          let list = '';
+          const rows = data.rows;
+
+          rows.sort((a, b) => {
+            let x = a.value.lastMessage; let y = b.value.lastMessage;
+            return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+          });
+
+          for (let i = 0; i < rows.length; ++i) {
+            const user = rows[i].value;
+            list += `#${user.id} '${user.name}' ${Util.timeDiff2Text(Util.UTCTime() - user.lastMessage)}\n`;
+          }
+
+          msg.sendMessage({
+            text: Util.format(local.list, [list])
+          });
+          this.$updateUserLastMessage(msg.from.id);
+        });
+      } else {
+        msg.sendMessage({
+          text: local.not_in_chat
+        });
+      }
+    });
+  }
+
+  $checkUserInChat(id) {
+    return new Promise((resolve, reject) => {
+      this.DB.get(
+        'anchat_users',
+        '_design/anchat_users/_view/by_tgid',
+        {key: id})
+      .then(({data}) => {
+        const rows = data.rows;
+        if (!rows.length || !rows[0].value.isChatUser) {
+          resolve({isChatUser: false});
+        } else {
+          resolve({isChatUser: true, UserData: rows[0].value});
+        }
+      }, reject)
+    });
+  }
+
+  $updateUserLastMessage(id) {
+    this.DB.get(
+      'anchat_users',
+      '_design/anchat_users/_view/by_tgid',
+      {key: id})
+    .then(({data}) => {
+      const rows = data.rows;
+      const newData = Object.assign(rows[0].value, {
+        _id: rows[0].id,
+        _rev: rows[0].value._rev,
+        lastMessage: Util.UTCTime()
+      });
+      this.DB.update('anchat_users', newData);
     });
   }
 

@@ -23,6 +23,39 @@ class Util {
     }
     return result;
   }
+
+  static UTCTime() {
+    return Math.floor(Date.now() / 1000);
+  }
+
+  static timeDiff2Text(diff) {
+    let text = '';
+
+    if (diff <= 3 * 60) {
+      text = 'онлайн';
+    } else {
+      const minutes = Math.floor(diff / 60);
+      if (minutes < 60) {
+        text = `был ${minutes} мин. назад`;
+      } else {
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) {
+          text = `был ${hours} ч. назад`
+        } else {
+          text = `был ${Math.floor(hours / 24)} д. назад`
+        }
+      }
+    }
+
+    return text;
+  }
+
+  static sortByKey(array, key) {
+    return array.sort(function(a, b) {
+        var x = a[key]; var y = b[key];
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+  }
 }
 
 module.exports = Util;
