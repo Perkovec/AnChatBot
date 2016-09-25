@@ -4,7 +4,8 @@ const local = require('./locals/ru.json');
 const CRegex = {
   start: /^(\/start)$/i,
   stop: /^(\/stop)$/i,
-  list: /^(\/list)$/i
+  list: /^(\/list)$/i,
+  nick: /^(\/nick\s)(.*)/i // 1 group = "/nick ", 2 group = nickname
 };
 
 const userGroups = {
@@ -28,6 +29,8 @@ class MsgProcessor {
       this.$stop(msg);
     } else if (CRegex.list.test(text)) {
       this.$list(msg);
+    } else if (CRegex.nick.test(text)) {
+      this.$nick(msg, text.match(CRegex.nick)[2]);
     } else {
       this.broadcastMessage(msg);
     }
@@ -91,7 +94,7 @@ class MsgProcessor {
         .then(({data}) => {
           const nickname = Nickname.generate(2);
           const length = (data.rows[0] && data.rows[0].value) || 0;
-          const msgTime = Utils.UTCTime();
+          const msgTime = Util.UTCTime();
           this.DB.insert('anchat_users', {
             _id: this.$getUid(),
             tg_id: msg.from.id,
@@ -191,6 +194,34 @@ class MsgProcessor {
             text: Util.format(local.list, [list])
           });
           this.$updateUserLastMessage(msg.from.id);
+        });
+      } else {
+        msg.sendMessage({
+          text: local.not_in_chat
+        });
+      }
+    });
+  }
+
+  $nick(msg, newNickname) {
+    this.$checkUserInChat(msg.from.id)
+    .then(({isChatUser, UserData}) => {
+      if (isChatUser) {
+        const oldNickname = UserData.name;
+        const newData = Object.assign(UserData, {
+          _id: UserData._id,
+          _rev: UserData._rev,
+          lastMessage: Util.UTCTime(),
+          name: newNickname
+        });
+        this.DB.update(
+          'anchat_users',
+          newData)
+        .then(({data}) => {
+          msg.sendMessage({
+            text: Util.format(local.new_nick, [newNickname])
+          });
+          this.broadcastPlaneMessage(Util.format(local.new_user_nick, [oldNickname, newNickname]), msg.from.id);
         });
       } else {
         msg.sendMessage({
