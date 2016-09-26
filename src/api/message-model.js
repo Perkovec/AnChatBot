@@ -1,6 +1,7 @@
 const User = require('./user-model');
 const Chat = require('./chat-model');
 const Audio = require('./audio-model');
+const Document = require('./document-model');
 const PhotoSize = require('./photosize-model');
 
 class Message {
@@ -16,6 +17,7 @@ class Message {
     this.edit_date = msg.edit_date || null;
     this.audio = msg.audio !== undefined ? new Audio(msg.audio, api) : null;
     this.photo = msg.photo !== undefined ? this.$photoSizes(msg.photo) : null;
+    this.document = msg.document !== undefined ? new Document(msg.document) : null;
 
     this.caption = msg.caption || null;
     this.text = msg.text || null;

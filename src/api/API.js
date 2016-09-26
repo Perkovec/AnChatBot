@@ -87,6 +87,10 @@ class API {
   sendPhoto(data) {
     return this.callMethod('sendPhoto', data);
   }
+  
+  sendDocument(data) {
+    return this.callMethod('sendDocument', data);
+  }
 
   getFile(data) {
     return this.callMethod('getFile', data);

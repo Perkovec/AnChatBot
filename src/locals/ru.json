@@ -11,5 +11,6 @@
   "new_user_nick": "[BOT] '{0}' сменил ник на '{1}'.",
   "reply_to": "В ответ на:\n{0}\n\n{1}",
   "audio_from_user": "{0} отправил аудио.",
-  "photo_from_user": "{0} отправил фото."
+  "photo_from_user": "{0} отправил фото.",
+  "document_from_user": "{0} отправил файл."
 }
