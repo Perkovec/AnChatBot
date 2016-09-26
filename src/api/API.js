@@ -27,7 +27,7 @@ class API {
             }
           } else {
             this.logger.error((res && res.body) || 'no body');
-            reject(res.body);
+            reject((res && res.body) || 'no body');
           }
         });
     });
@@ -82,6 +82,10 @@ class API {
 
   sendAudio(data) {
     return this.callMethod('sendAudio', data);
+  }
+
+  sendPhoto(data) {
+    return this.callMethod('sendPhoto', data);
   }
 
   getFile(data) {

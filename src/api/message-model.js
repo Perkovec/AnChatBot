@@ -1,6 +1,7 @@
 const User = require('./user-model');
 const Chat = require('./chat-model');
 const Audio = require('./audio-model');
+const PhotoSize = require('./photosize-model');
 
 class Message {
   constructor(msg, api) {
@@ -14,11 +15,21 @@ class Message {
     this.reply_to_message = msg.reply_to_message !== undefined ? new Message(msg.reply_to_message, api) : null;
     this.edit_date = msg.edit_date || null;
     this.audio = msg.audio !== undefined ? new Audio(msg.audio, api) : null;
+    this.photo = msg.photo !== undefined ? this.$photoSizes(msg.photo) : null;
 
+    this.caption = msg.caption || null;
     this.text = msg.text || null;
 
     this.$api = api;
     this.registerMethods();
+  }
+
+  $photoSizes(photos) {
+    const out = [];
+    for (let i = 0; i < photos.length; ++i) {
+      out.push(new PhotoSize(photos[i]));
+    }
+    return out;
   }
 
   registerMethods() {
