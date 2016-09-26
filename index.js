@@ -16,7 +16,12 @@ config.logger = logger;
 
 const API = new TgAPI(config);
 
-const couch = new NodeCouchDb();
+const couch = new NodeCouchDb({
+  auth: {
+    user: config.couchdb.username,
+    pass: config.couchdb.password
+  }
+});
 
 couch.uniqid(1000).then(ids => {
   couch.ids = ids;
