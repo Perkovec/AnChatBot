@@ -21,12 +21,100 @@ class BroadcastMessage {
           this.$sendDocument(msg, UserData);
         } else if (msg.sticker) {
           this.$sendSticker(msg, UserData);
+        } else if (msg.video) {
+          this.$sendVideo(msg, UserData);
+        } else if (msg.voice) {
+          this.$sendVoice(msg, UserData);
         }
       } else {
         msg.sendMessage({
           text: local.not_in_chat
         });
       }
+    });
+  }
+
+  $sendVoice(msg, UserData) {
+    const nickname = UserData.name;
+    let text;
+    if (msg.caption) {
+      text = `${nickname}: ${msg.caption}`;
+    } else {
+      text = Util.format(local.voice_from_user, [nickname]);
+    }
+    
+    if (msg.reply_to_message !== null) {
+      const reply = msg.reply_to_message;
+      let replyText = reply.text || reply.caption;
+      let reply_msg;
+      if (reply.id === msg.from.id) {
+        reply_msg = `${nickname}: ${replyText}`;
+      } else {
+        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
+        reply_msg = replyText;
+      }
+
+      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
+      text = Util.format(local.reply_to, [reply_msg, text]);
+    }
+
+    this.DB.get(
+      'anchat_users',
+      '_design/anchat_users/_view/by_isChatUser')
+    .then(({data}) => {
+      const rows = data.rows;
+      for (let i = 0; i < rows.length; ++i) {
+        if (rows[i].key !== msg.from.id) {
+          this.API.sendVoice({
+            chat_id: rows[i].key,
+            voice: msg.voice.file_id,
+            caption: text
+          });
+        }
+      }
+      this.$updateUserLastMessage(msg.from.id);
+    });
+  }
+
+  $sendVideo(msg, UserData) {
+    const nickname = UserData.name;
+    let text;
+    if (msg.caption) {
+      text = `${nickname}: ${msg.caption}`;
+    } else {
+      text = Util.format(local.video_from_user, [nickname]);
+    }
+    
+    if (msg.reply_to_message !== null) {
+      const reply = msg.reply_to_message;
+      let replyText = reply.text || reply.caption;
+      let reply_msg;
+      if (reply.id === msg.from.id) {
+        reply_msg = `${nickname}: ${replyText}`;
+      } else {
+        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
+        reply_msg = replyText;
+      }
+
+      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
+      text = Util.format(local.reply_to, [reply_msg, text]);
+    }
+
+    this.DB.get(
+      'anchat_users',
+      '_design/anchat_users/_view/by_isChatUser')
+    .then(({data}) => {
+      const rows = data.rows;
+      for (let i = 0; i < rows.length; ++i) {
+        if (rows[i].key !== msg.from.id) {
+          this.API.sendVideo({
+            chat_id: rows[i].key,
+            video: msg.video.file_id,
+            caption: text
+          });
+        }
+      }
+      this.$updateUserLastMessage(msg.from.id);
     });
   }
 

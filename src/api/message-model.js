@@ -3,6 +3,8 @@ const Chat = require('./chat-model');
 const Audio = require('./audio-model');
 const Document = require('./document-model');
 const Sticker = require('./sticker-model');
+const Video = require('./video-model');
+const Voice = require('./voice-model');
 const PhotoSize = require('./photosize-model');
 
 class Message {
@@ -20,7 +22,9 @@ class Message {
     this.photo = msg.photo !== undefined ? this.$photoSizes(msg.photo) : null;
     this.document = msg.document !== undefined ? new Document(msg.document) : null;
     this.sticker = msg.sticker !== undefined ? new Sticker(msg.sticker) : null;
-
+    this.video = msg.video !== undefined ? new Video(msg.video) : null;
+    this.voice = msg.voice !== undefined ? new Voice(msg.voice) : null;
+    
     this.caption = msg.caption || null;
     this.text = msg.text || null;
 

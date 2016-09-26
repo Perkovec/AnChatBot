@@ -10,8 +10,10 @@
   "new_nick": "[BOT] Твой новый ник - '{0}'.",
   "new_user_nick": "[BOT] '{0}' сменил ник на '{1}'.",
   "reply_to": "В ответ на:\n{0}\n\n{1}",
-  "audio_from_user": "{0} отправил аудио.",
-  "photo_from_user": "{0} отправил фото.",
-  "document_from_user": "{0} отправил файл.",
-  "sticker_from_user": "{0} отправил стикер."
+  "audio_from_user": "{0} отправил(а) аудио.",
+  "photo_from_user": "{0} отправил(а) фото.",
+  "document_from_user": "{0} отправил(а) файл.",
+  "sticker_from_user": "{0} отправил(а) стикер.",
+  "video_from_user": "{0} отправил(а) видео.",
+  "voice_from_user": "{0} отправил(а) войс."
 }

@@ -96,6 +96,14 @@ class API {
     return this.callMethod('sendSticker', data);
   }
 
+  sendVideo(data) {
+    return this.callMethod('sendVideo', data);
+  }
+
+  sendVoice(data) {
+    return this.callMethod('sendVoice', data);
+  }
+
   getFile(data) {
     return this.callMethod('getFile', data);
   }
