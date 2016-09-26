@@ -23,5 +23,5 @@ couch.uniqid(1000).then(ids => {
   const OnMsg = new MsgProcessor(API, couch);
 
   API.onMessage(msg => OnMsg.process(msg));
-  API.startPolling();
+  API.run();
 });

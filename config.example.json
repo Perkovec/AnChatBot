@@ -3,9 +3,12 @@
   "webhook": false,
   "webhook_ip": "127.0.0.1",
   "webhook_port": 8080,
+  "certificate_path": "example.pem",
   "couchdb": {
     "host": "localhost",
     "port": "5984",
-    "database": "anchat_users"
+    "database": "anchat_users",
+    "username": "anchat",
+    "password": "anchat"
   }
 }

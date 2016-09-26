@@ -1,5 +1,6 @@
 const request = require('superagent');
 const Message = require('./message-model');
+const http = require('http');
 
 class API {
   constructor(configs) {
@@ -64,11 +65,36 @@ class API {
     this.listeners.onMessage = listener;
   }
 
-  startPolling() {
+  run() {
     if (!this.configs.webhook) {
       this.polling();
     } else {
-      console.log('Polling not enabled (webhook: true)'); // eslint-disable-line no-console
+      http.createServer((request, response) => {
+        if(request.method === "POST") {
+          let requestBody = '';
+          request.on('data', function(data) {
+            requestBody += data;
+          });
+          request.on('end', function() {
+            conosle.log(requestBody);
+            response.writeHead(200);
+            response.end();
+          });
+        }
+      })
+      .listen(this.configs.webhook_port, () => {
+        request
+          .post(`${this.apiURL}setWebhook`)
+          .field('url', this.configs.webhook_ip)
+          .attach('certificate', this.configs.certificate_path)
+          .end((err, res) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(res.body);
+            }
+          });
+      });
     }
   }
 
