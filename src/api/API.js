@@ -92,6 +92,10 @@ class API {
     return this.callMethod('sendDocument', data);
   }
 
+  sendSticker(data) {
+    return this.callMethod('sendSticker', data);
+  }
+
   getFile(data) {
     return this.callMethod('getFile', data);
   }

@@ -2,6 +2,7 @@ const User = require('./user-model');
 const Chat = require('./chat-model');
 const Audio = require('./audio-model');
 const Document = require('./document-model');
+const Sticker = require('./sticker-model');
 const PhotoSize = require('./photosize-model');
 
 class Message {
@@ -18,6 +19,7 @@ class Message {
     this.audio = msg.audio !== undefined ? new Audio(msg.audio, api) : null;
     this.photo = msg.photo !== undefined ? this.$photoSizes(msg.photo) : null;
     this.document = msg.document !== undefined ? new Document(msg.document) : null;
+    this.sticker = msg.sticker !== undefined ? new Sticker(msg.sticker) : null;
 
     this.caption = msg.caption || null;
     this.text = msg.text || null;
