@@ -5,8 +5,8 @@ const local = require('./locals/ru.json');
 const Start = require('./tasks/start.js');
 const Stop = require('./tasks/stop.js');
 const List = require('./tasks/list.js');
-const Nick = require('./tasks/Nick.js');
-const Help = require('./tasks/Help.js');
+const Nick = require('./tasks/nick.js');
+const Help = require('./tasks/help.js');
 const BroadcastMessage = require('./tasks/broadcastMessage');
 const BroadcastPlaneMessage = require('./tasks/broadcastPlaneMessage');
 
