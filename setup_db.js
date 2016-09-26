@@ -9,7 +9,7 @@ const couch = new NodeCouchDb({
 });
 
 couch.createDatabase('anchat_users').then(() => {
-  couch.update('anchat_users', {
+  couch.insert('anchat_users', {
     _id: '_design/anchat_users',
     language: 'javascript',
     views: {
