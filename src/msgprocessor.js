@@ -6,12 +6,14 @@ const Start = require('./tasks/start.js');
 const Stop = require('./tasks/stop.js');
 const List = require('./tasks/list.js');
 const Nick = require('./tasks/Nick.js');
+const Help = require('./tasks/Help.js');
 const BroadcastMessage = require('./tasks/broadcastMessage');
 const BroadcastPlaneMessage = require('./tasks/broadcastPlaneMessage');
 
 const CRegex = {
   start: /^(\/start)$/i,
   stop: /^(\/stop)$/i,
+  help: /^(\/help)$/i,
   list: /^(\/list)$/i,
   nick: /^(\/nick\s)(.*)/i // 1 group = "/nick ", 2 group = nickname
 };
@@ -31,6 +33,7 @@ class MsgProcessor {
     this.$stop = new Stop(this.API, this.DB);
     this.$list = new List(this.API, this.DB);
     this.$nick = new Nick(this.API, this.DB);
+    this.$help = new Help(this.API, this.DB);
     this.broadcastMessage = new BroadcastMessage(this.API, this.DB);
     this.broadcastPlaneMessage = new BroadcastPlaneMessage(this.API, this.DB);
   }
@@ -46,6 +49,8 @@ class MsgProcessor {
       this.$list.process(msg);
     } else if (CRegex.nick.test(text)) {
       this.$nick.process(msg, text.match(CRegex.nick)[2]);
+    } else if (CRegex.help.test(text)) {
+      this.$help.process(msg);
     } else {
       this.broadcastMessage.process(msg);
     }
