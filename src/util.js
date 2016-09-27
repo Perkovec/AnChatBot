@@ -70,6 +70,15 @@ class Util {
     lines.splice(0, lineCount);
     return lines.join('\n');
   }
+
+  static escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
 }
 
 module.exports = Util;

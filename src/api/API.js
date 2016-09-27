@@ -10,37 +10,43 @@ class API {
     this.apiURL = `https://api.telegram.org/bot${this.token}/`;
     this.offset = 0;
     this.listeners = {};
+
+    process.on('unhandledRejection', (reason, promise) => {this.logger.error(`Unhandled reject: ${reason}`)});
   }
 
   callMethod(name, data) {
+    const scope = this;
     return new Promise((resolve, reject) => {
       try {
-      request
-        .post(this.apiURL + name, data)
+        request
+        .post(scope.apiURL + name, data)
         .then(res => {
           if (res && typeof res.data === 'object') {
             if (res.data.ok) {
               resolve(res.data.result);
             } else {
               res.data.reqData = data;
-              this.logger.error(res.data);
-              this.listeners.onError(data, res.data);
+              scope.logger.error(res.data);
+              scope.listeners.onError(data, res.data);
               reject(res.data);
             }
           } else {
             if (res && res.data) {
               res.data.reqData = data;
-              this.logger.error(res.data);
+              scope.logger.error(res.data);
               reject(res.data);
             } else {
-              this.logger.error(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
+              scope.logger.error(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
               reject(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
             }
           }
         })
-        .catch(reject);
+        .catch(() => {
+          scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${data}`);
+          reject(e);
+        });
       } catch(e) {
-        this.logger.error(`request error ${e}\nmethod: ${name}, data: ${data}`);
+        scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${data}`);
         reject(e);
       }
     });

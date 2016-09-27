@@ -6,6 +6,7 @@ const Sticker = require('./sticker-model');
 const Video = require('./video-model');
 const Voice = require('./voice-model');
 const PhotoSize = require('./photosize-model');
+const MessageEntity = require('./messageentity-model');
 
 class Message {
   constructor(msg, api) {
@@ -24,10 +25,9 @@ class Message {
     this.sticker = msg.sticker !== undefined ? new Sticker(msg.sticker) : null;
     this.video = msg.video !== undefined ? new Video(msg.video) : null;
     this.voice = msg.voice !== undefined ? new Voice(msg.voice) : null;
-    
+    this.entities = msg.entities !== undefined ? this.$messageEntities(msg.entities) : null;
     this.caption = msg.caption || null;
     this.text = msg.text || null;
-
     this.$api = api;
     this.registerMethods();
   }
@@ -36,6 +36,14 @@ class Message {
     const out = [];
     for (let i = 0; i < photos.length; ++i) {
       out.push(new PhotoSize(photos[i]));
+    }
+    return out;
+  }
+
+  $messageEntities(entities) {
+    const out = [];
+    for (let i = 0; i < entities.length; ++i) {
+      out.push(new MessageEntity(entities[i]));
     }
     return out;
   }

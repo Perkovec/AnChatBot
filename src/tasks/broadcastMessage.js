@@ -1,3 +1,5 @@
+const url = require('url');
+const linkify = require('linkifyjs');
 const Util = require('../util');
 const local = require('../locals/ru.json');
 
@@ -36,27 +38,7 @@ class BroadcastMessage {
 
   $sendVoice(msg, UserData) {
     const nickname = UserData.name;
-    let text;
-    if (msg.caption) {
-      text = `${nickname}: ${msg.caption}`;
-    } else {
-      text = Util.format(local.voice_from_user, [nickname]);
-    }
-    
-    if (msg.reply_to_message !== null) {
-      const reply = msg.reply_to_message;
-      let replyText = reply.text || reply.caption;
-      let reply_msg;
-      if (reply.id === msg.from.id) {
-        reply_msg = `${nickname}: ${replyText}`;
-      } else {
-        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
-        reply_msg = replyText;
-      }
-
-      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
-      text = Util.format(local.reply_to, [reply_msg, text]);
-    }
+    const text = this.$getTextToSend(msg, nickname, local.voice_from_user);
 
     this.DB.get(
       'anchat_users',
@@ -78,27 +60,7 @@ class BroadcastMessage {
 
   $sendVideo(msg, UserData) {
     const nickname = UserData.name;
-    let text;
-    if (msg.caption) {
-      text = `${nickname}: ${msg.caption}`;
-    } else {
-      text = Util.format(local.video_from_user, [nickname]);
-    }
-    
-    if (msg.reply_to_message !== null) {
-      const reply = msg.reply_to_message;
-      let replyText = reply.text || reply.caption;
-      let reply_msg;
-      const reply_text = reply.text || reply.caption;
-      if (reply.from.id === msg.from.id) {
-        reply_msg = `${nickname}: ${reply_text}`;
-      } else {
-        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
-      }
-
-      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
-      text = Util.format(local.reply_to, [reply_msg, text]);
-    }
+    const text = this.$getTextToSend(msg, nickname, local.video_from_user);
 
     this.DB.get(
       'anchat_users',
@@ -119,24 +81,8 @@ class BroadcastMessage {
   }
 
   $sendSticker(msg, UserData) {
-    console.log('sticker')
     const nickname = UserData.name;
-    let text = Util.format(local.sticker_from_user, [nickname]);
-    
-    if (msg.reply_to_message !== null) {
-      const reply = msg.reply_to_message;
-      let replyText = reply.text || reply.caption;
-      let reply_msg;
-      const reply_text = reply.text || reply.caption;
-      if (reply.from.id === msg.from.id) {
-        reply_msg = `${nickname}: ${reply_text}`;
-      } else {
-        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
-      }
-
-      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
-      text = Util.format(local.reply_to, [reply_msg, text]);
-    }
+    const text = this.$getTextToSend(msg, nickname, local.sticker_from_user);
 
     this.DB.get(
       'anchat_users',
@@ -163,27 +109,7 @@ class BroadcastMessage {
 
   $sendDocument(msg, UserData) {
     const nickname = UserData.name;
-    let text;
-    if (msg.caption) {
-      text = `${nickname}: ${msg.caption}`;
-    } else {
-      text = Util.format(local.document_from_user, [nickname]);
-    }
-    
-    if (msg.reply_to_message !== null) {
-      const reply = msg.reply_to_message;
-      let replyText = reply.text || reply.caption;
-      let reply_msg;
-      const reply_text = reply.text || reply.caption;
-      if (reply.from.id === msg.from.id) {
-        reply_msg = `${nickname}: ${reply_text}`;
-      } else {
-        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
-      }
-
-      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
-      text = Util.format(local.reply_to, [reply_msg, text]);
-    }
+    const text = this.$getTextToSend(msg, nickname, local.document_from_user);
 
     this.DB.get(
       'anchat_users',
@@ -205,27 +131,7 @@ class BroadcastMessage {
 
   $sendPhoto(msg, UserData) {
     const nickname = UserData.name;
-    let text;
-    if (msg.caption) {
-      text = `${nickname}: ${msg.caption}`;
-    } else {
-      text = Util.format(local.photo_from_user, [nickname]);
-    }
-    
-    if (msg.reply_to_message !== null) {
-      const reply = msg.reply_to_message;
-      let replyText = reply.text || reply.caption;
-      let reply_msg;
-      const reply_text = reply.text || reply.caption;
-      if (reply.from.id === msg.from.id) {
-        reply_msg = `${nickname}: ${reply_text}`;
-      } else {
-        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
-      }
-
-      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
-      text = Util.format(local.reply_to, [reply_msg, text]);
-    }
+    const text = this.$getTextToSend(msg, nickname, local.photo_from_user);
 
     this.DB.get(
       'anchat_users',
@@ -248,21 +154,7 @@ class BroadcastMessage {
 
   $sendAudio(msg, UserData) {
     const nickname = UserData.name;
-    let text = Util.format(local.audio_from_user, [nickname]);
-    if (msg.reply_to_message !== null) {
-      const reply = msg.reply_to_message;
-      let replyText = reply.text || reply.caption;
-      let reply_msg;
-      const reply_text = reply.text || reply.caption;
-      if (reply.from.id === msg.from.id) {
-        reply_msg = `${nickname}: ${reply_text}`;
-      } else {
-        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
-      }
-
-      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
-      text = Util.format(local.reply_to, [reply_msg, text]);
-    }
+    const text = this.$getTextToSend(msg, nickname, local.audio_from_user);
 
     this.DB.get(
       'anchat_users',
@@ -284,20 +176,7 @@ class BroadcastMessage {
 
   $sendText(msg, UserData) {
     const nickname = UserData.name;
-    let text = `${nickname}: ${msg.text}`;
-    if (msg.reply_to_message !== null) {
-      const reply = msg.reply_to_message;
-      let reply_msg;
-      const reply_text = reply.text || reply.caption;
-      if (reply.from.id === msg.from.id) {
-        reply_msg = `${nickname}: ${reply_text}`;
-      } else {
-        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
-      }
-
-      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
-      text = Util.format(local.reply_to, [reply_msg, text]);
-    }
+    const text = this.$getTextToSend(msg, nickname);
     
     this.DB.get(
       'anchat_users',
@@ -308,7 +187,8 @@ class BroadcastMessage {
         if (rows[i].key !== msg.from.id) {
           this.API.sendMessage({
             chat_id: rows[i].key,
-            text: text
+            text: text,
+            parse_mode: 'HTML'
           });
         }
       }
@@ -347,6 +227,45 @@ class BroadcastMessage {
       });
       this.DB.update('anchat_users', newData);
     });
+  }
+
+  $getTextToSend(msg, nickname, template) {
+    let text;
+    if (msg.caption || !template) {
+      text = msg.caption ? msg.caption : this.$linkShortener(msg);
+      text = `${nickname}: ${text}`;
+    } else {
+      text = Util.escapeHtml(Util.format(template, [nickname]));
+    }
+    
+    if (msg.reply_to_message !== null) {
+      const reply = msg.reply_to_message;
+      let replyText = reply.text || reply.caption;
+      let reply_msg;
+      if (reply.from.id === msg.from.id) {
+        reply_msg = `${nickname}: ${replyText}`;
+      } else if (replyText) {
+        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
+        reply_msg = replyText;
+      }
+
+      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
+      text = Util.format(local.reply_to, [reply_msg, text]);
+    }
+    return text;
+  }
+
+  $linkShortener(msg) {
+    if (!msg.entities) return msg.text;
+
+    let new_text = Util.escapeHtml(msg.text);
+    const links = linkify.find(msg.text, 'url');
+    for (let i = 0; i < links.length; ++i) {
+      const link = links[0];
+      new_text = new_text.replace(Util.escapeHtml(link.value), `<a href="${link.href}">${url.parse(link.href).host}...</a>`);
+    }
+    
+    return new_text;
   }
 }
 
