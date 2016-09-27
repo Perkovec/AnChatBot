@@ -67,9 +67,13 @@ class API {
 
   run() {
     if (!this.configs.webhook) {
-      this.polling();
+      this.callMethod('setWebhook', {
+        url: '',
+      })
+      .then(() => this.polling())
     } else {
       http.createServer((request, response) => {
+        console.log(re)
         if(request.method === "POST") {
           let requestBody = '';
           request.on('data', function(data) {
