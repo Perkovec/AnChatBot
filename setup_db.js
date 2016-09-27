@@ -11,6 +11,9 @@ const _design = {
     by_chatid: {
       map: "function(doc) {\n  emit(doc.id, doc);\n}"
     },
+    by_nick: {
+      map: "function(doc) {\n  emit(doc.name, doc);\n}"
+    },
     count: {
       map: "function(doc) {\n  emit(\"length\", 1);\n}",
       reduce: "function(keys, values, rereduce) {\n  return sum(values);\n}"

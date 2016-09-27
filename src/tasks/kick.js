@@ -13,7 +13,6 @@ class Kick {
 
   process(msg, user_id) {
     if (msg.from.id !== this.API.configs.admin) return;
-    console.log(user_id)
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_chatid',

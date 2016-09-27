@@ -3,7 +3,7 @@ const local = require('../locals/ru.json');
 
 const BroadcastPlaneMessage = require('./broadcastPlaneMessage');
 
-class Nick {
+class Rename {
   constructor(api, db) {
     this.API = api;
     this.DB = db;
@@ -11,47 +11,37 @@ class Nick {
     this.broadcastPlaneMessage = new BroadcastPlaneMessage(this.API, this.DB);
   }
 
-  process(msg, newNickname) {
-    this.$checkUserInChat(msg.from.id)
-    .then(({isChatUser, UserData}) => {
-      if (isChatUser) {
-        if (newNickname.length < 1) {
-          return msg.sendMessage({
-            text: local.short_nickname
+  process(msg, user_id, newNickname) {
+    if (msg.from.id !== this.API.configs.admin) return;
+    this.DB.get(
+      'anchat_users',
+      '_design/anchat_users/_view/by_chatid',
+      {key: user_id.toUpperCase()})
+    .then(({data}) => {
+      const rows = data.rows;
+      if (rows.length > 0) {
+        const UserData = rows[0].value;
+        const oldNickname = UserData.name;
+        const newData = Object.assign(UserData, {
+          _id: UserData._id,
+          _rev: UserData._rev,
+          name: newNickname
+        });
+        this.DB.update(
+          'anchat_users',
+          newData)
+        .then(({data}) => {
+          this.API.sendMessage({
+            chat_id: UserData.tg_id,
+            text: Util.format(local.your_nick_changed, [newNickname])
           });
-        } else {
-          this.$checkUsername(newNickname)
-          .then(contains => {
-            if (contains) {
-              msg.sendMessage({
-                text: local.nickname_exists
-              });
-            } else {
-              const oldNickname = UserData.name;
-              const newData = Object.assign(UserData, {
-                _id: UserData._id,
-                _rev: UserData._rev,
-                lastMessage: Util.UTCTime(),
-                name: newNickname
-              });
-              this.DB.update(
-                'anchat_users',
-                newData)
-              .then(({data}) => {
-                msg.sendMessage({
-                  text: Util.format(local.new_nick, [newNickname])
-                });
-                this.broadcastPlaneMessage.process(Util.format(local.new_user_nick, [oldNickname, newNickname]), msg.from.id);
-              });
-            }
-          });
-          
-        }
+          this.broadcastPlaneMessage.process(Util.format(local.new_user_nick, [oldNickname, newNickname]), UserData.tg_id);
+        });
       } else {
         msg.sendMessage({
-          text: local.not_in_chat
+          text: local.user_not_found
         });
-      }
+      }    
     });
   }
 
@@ -101,4 +91,4 @@ class Nick {
   }
 }
 
-module.exports = Nick;
+module.exports = Rename;
