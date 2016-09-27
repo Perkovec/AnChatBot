@@ -12,6 +12,11 @@ class Nick {
   }
 
   process(msg, newNickname) {
+    if (newNickname.length < 1) {
+      return msg.sendMessage({
+        text: local.short_nickname
+      });
+    }
     this.$checkUserInChat(msg.from.id)
     .then(({isChatUser, UserData}) => {
       if (isChatUser) {

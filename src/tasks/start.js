@@ -32,7 +32,7 @@ class Start {
         this.$createNewUser(msg, nickname)
         .then(({data}) => {
           msg.sendMessage({
-            text: Util.format(local.start, [nickname]),
+            text: Util.format(local.start_new, [nickname]),
           });
 
           this.broadcastPlaneMessage.process(Util.format(local.new_user, [nickname]), msg.from.id);

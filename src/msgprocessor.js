@@ -2,11 +2,12 @@ const Nickname = require('./nick');
 const Util = require('./util');
 const local = require('./locals/ru.json');
 
-const Start = require('./tasks/start.js');
-const Stop = require('./tasks/stop.js');
-const List = require('./tasks/list.js');
-const Nick = require('./tasks/nick.js');
-const Help = require('./tasks/help.js');
+const Start = require('./tasks/start');
+const Stop = require('./tasks/stop');
+const List = require('./tasks/list');
+const Nick = require('./tasks/nick');
+const Help = require('./tasks/help');
+const Kick = require('./tasks/kick');
 const BroadcastMessage = require('./tasks/broadcastMessage');
 const BroadcastPlaneMessage = require('./tasks/broadcastPlaneMessage');
 
@@ -15,7 +16,8 @@ const CRegex = {
   stop: /^(\/stop)$/i,
   help: /^(\/help)$/i,
   list: /^(\/list)$/i,
-  nick: /^(\/nick\s)(.*)/i // 1 group = "/nick ", 2 group = nickname
+  nick: /^(\/nick\s)(.*)/i, // 1 group = "/nick ", 2 group = nickname
+  kick: /^(\/kick\s)(.*)/i // 1 group = "/kick ", 2 group = chat_id
 };
 
 const userGroups = {
@@ -34,6 +36,7 @@ class MsgProcessor {
     this.$list = new List(this.API, this.DB);
     this.$nick = new Nick(this.API, this.DB);
     this.$help = new Help(this.API, this.DB);
+    this.$kick = new Kick(this.API, this.DB);
     this.broadcastMessage = new BroadcastMessage(this.API, this.DB);
     this.broadcastPlaneMessage = new BroadcastPlaneMessage(this.API, this.DB);
   }
@@ -51,6 +54,8 @@ class MsgProcessor {
       this.$nick.process(msg, text.match(CRegex.nick)[2]);
     } else if (CRegex.help.test(text)) {
       this.$help.process(msg);
+    } else if (CRegex.kick.test(text)) {
+      this.$kick.process(msg, text.match(CRegex.kick)[2]);
     } else {
       this.broadcastMessage.process(msg);
     }
