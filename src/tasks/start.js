@@ -4,6 +4,12 @@ const local = require('../locals/ru.json');
 
 const BroadcastPlaneMessage = require('./broadcastPlaneMessage');
 
+const userGroups = {
+  NEWBIE: 0,
+  USER: 1,
+  ADMIN: 100,
+};
+
 class Start {
   constructor(api, db) {
     this.API = api;
