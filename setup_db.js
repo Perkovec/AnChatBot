@@ -9,6 +9,13 @@ const couch = new NodeCouchDb({
 });
 
 couch.createDatabase('anchat_users').then(() => {
+  createDocument();
+}, err => {
+  console.log(err);
+  createDocument();
+});
+
+function createDocument() {
   couch.insert('anchat_users', {
     _id: '_design/anchat_users',
     language: 'javascript',
@@ -29,6 +36,4 @@ couch.createDatabase('anchat_users').then(() => {
   }, err => {
     console.log(err);
   });
-}, err => {
-  console.log(err);
-});
+}
