@@ -13,6 +13,7 @@ const BroadcastMessage = require('./tasks/broadcastMessage');
 const BroadcastPlaneMessage = require('./tasks/broadcastPlaneMessage');
 
 const CRegex = {
+  some_command: /^\/\w*.*/i,
   start: /^(\/start)$/i,
   stop: /^(\/stop)$/i,
   help: /^(\/help)$/i,
@@ -45,7 +46,7 @@ class MsgProcessor {
   }
 
   process(msg) {
-    const text = msg.text;
+    const text = msg.text ? msg.text.trim() : msg.text;
     
     if (CRegex.start.test(text)) {
       this.$start.process(msg);
@@ -62,6 +63,10 @@ class MsgProcessor {
     }  else if (CRegex.rename.test(text)) {
       const matches = text.match(CRegex.rename);
       this.$rename.process(msg, matches[2], matches[3]);
+    } else if (CRegex.some_command.test(text)) {
+      msg.sendMessage({
+        text: local.unknown_command
+      });
     } else {
       this.broadcastMessage.process(msg);
     }

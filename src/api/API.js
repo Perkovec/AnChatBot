@@ -41,6 +41,7 @@ class API {
         .catch(reject);
       } catch(e) {
         this.logger.error(`request error ${e}\nmethod: ${name}, data: ${data}`);
+        reject(e);
       }
     });
   }
@@ -64,7 +65,7 @@ class API {
         this.offset = lastUpdate.update_id + 1;
       }
       this.polling();
-    });
+    }, this.polling);
   }
 
   buildMethods() {

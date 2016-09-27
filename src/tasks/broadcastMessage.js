@@ -89,11 +89,11 @@ class BroadcastMessage {
       const reply = msg.reply_to_message;
       let replyText = reply.text || reply.caption;
       let reply_msg;
-      if (reply.id === msg.from.id) {
-        reply_msg = `${nickname}: ${replyText}`;
+      const reply_text = reply.text || reply.caption;
+      if (reply.from.id === msg.from.id) {
+        reply_msg = `${nickname}: ${reply_text}`;
       } else {
-        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
-        reply_msg = replyText;
+        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
       }
 
       reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
@@ -127,11 +127,11 @@ class BroadcastMessage {
       const reply = msg.reply_to_message;
       let replyText = reply.text || reply.caption;
       let reply_msg;
-      if (reply.id === msg.from.id) {
-        reply_msg = `${nickname}: ${replyText}`;
+      const reply_text = reply.text || reply.caption;
+      if (reply.from.id === msg.from.id) {
+        reply_msg = `${nickname}: ${reply_text}`;
       } else {
-        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
-        reply_msg = replyText;
+        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
       }
 
       reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
@@ -174,11 +174,11 @@ class BroadcastMessage {
       const reply = msg.reply_to_message;
       let replyText = reply.text || reply.caption;
       let reply_msg;
-      if (reply.id === msg.from.id) {
-        reply_msg = `${nickname}: ${replyText}`;
+      const reply_text = reply.text || reply.caption;
+      if (reply.from.id === msg.from.id) {
+        reply_msg = `${nickname}: ${reply_text}`;
       } else {
-        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
-        reply_msg = replyText;
+        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
       }
 
       reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
@@ -216,11 +216,11 @@ class BroadcastMessage {
       const reply = msg.reply_to_message;
       let replyText = reply.text || reply.caption;
       let reply_msg;
-      if (reply.id === msg.from.id) {
-        reply_msg = `${nickname}: ${replyText}`;
+      const reply_text = reply.text || reply.caption;
+      if (reply.from.id === msg.from.id) {
+        reply_msg = `${nickname}: ${reply_text}`;
       } else {
-        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
-        reply_msg = replyText;
+        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
       }
 
       reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
@@ -253,11 +253,11 @@ class BroadcastMessage {
       const reply = msg.reply_to_message;
       let replyText = reply.text || reply.caption;
       let reply_msg;
-      if (reply.id === msg.from.id) {
-        reply_msg = `${nickname}: ${replyText}`;
+      const reply_text = reply.text || reply.caption;
+      if (reply.from.id === msg.from.id) {
+        reply_msg = `${nickname}: ${reply_text}`;
       } else {
-        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
-        reply_msg = replyText;
+        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
       }
 
       reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
@@ -288,11 +288,11 @@ class BroadcastMessage {
     if (msg.reply_to_message !== null) {
       const reply = msg.reply_to_message;
       let reply_msg;
-      if (reply.id === msg.from.id) {
-        reply_msg = `${nickname}: ${reply.text}`;
+      const reply_text = reply.text || reply.caption;
+      if (reply.from.id === msg.from.id) {
+        reply_msg = `${nickname}: ${reply_text}`;
       } else {
-        reply.text = reply.text.startsWith('В ответ на:') ? Util.cutLines(reply.text, 3) : reply.text;
-        reply_msg = reply.text;
+        reply_msg = reply_text.startsWith('В ответ на:') ? Util.cutLines(reply_text, 3) : reply_text;
       }
 
       reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
