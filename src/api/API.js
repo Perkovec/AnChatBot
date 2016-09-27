@@ -14,6 +14,7 @@ class API {
 
   callMethod(name, data) {
     return new Promise((resolve, reject) => {
+      try {
       request
         .post(this.apiURL + name)
         .send(data)
@@ -23,14 +24,25 @@ class API {
             if (res.body.ok) {
               resolve(res.body.result);
             } else {
+              res.body.reqData = data;
               this.logger.error(res.body);
+              this.listeners.onError(data, res.body);
               reject(res.body);
             }
           } else {
-            this.logger.error((res && res.body) || 'no body');
-            reject((res && res.body) || 'no body');
+            if (res && res.body) {
+              res.body.reqData = data;
+              this.logger.error(res.body);
+              reject(res.body);
+            } else {
+              this.logger.error(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
+              reject(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
+            }
           }
         });
+      } catch(e) {
+        this.logger.error(`request error ${e}\nmethod: ${name}, data: ${data}`);
+      }
     });
   }
 
@@ -43,6 +55,8 @@ class API {
         for (const update of updates) {
           if (update.message) {
             onMessage(new Message(update.message, this));
+          } else {
+            this.logger.warn(`Unknown update type: ${JSON.stringify(update)}`);
           }
         }
       }
@@ -63,6 +77,10 @@ class API {
 
   onMessage(listener) {
     this.listeners.onMessage = listener;
+  }
+
+  onError(listener) {
+    this.listeners.onError = listener;
   }
 
   run() {

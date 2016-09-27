@@ -55,6 +55,33 @@ class MsgProcessor {
       this.broadcastMessage.process(msg);
     }
   }
+
+  processError(msg, err) {
+    switch(err.error_code) {
+      case 403:
+        this.DB.get(
+          'anchat_users',
+          '_design/anchat_users/_view/by_tgid',
+          {key: msg.chat_id})
+        .then(({data}) => {
+          const rows = data.rows;
+          if (rows.length && rows[0].value.isChatUser) {
+            const newData = Object.assign(rows[0].value, {
+              _id: rows[0].id,
+              _rev: rows[0].value._rev,
+              isChatUser: false
+            });
+            this.DB.update(
+              'anchat_users',
+              newData)
+            .then(({data}) => {
+              this.broadcastPlaneMessage.process(Util.format(local.leave_chat_with_ban, [rows[0].value.name]), msg.chat_id);
+            });
+          }
+        });
+      break;
+    }
+  }
 }
 
 module.exports = MsgProcessor;
