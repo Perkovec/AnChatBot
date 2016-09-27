@@ -1,4 +1,4 @@
-const request = require('superagent');
+const request = require('axios');
 const Message = require('./message-model');
 const http = require('http');
 
@@ -16,30 +16,29 @@ class API {
     return new Promise((resolve, reject) => {
       try {
       request
-        .post(this.apiURL + name)
-        .send(data)
-        .end((err, res) => {
-          if (err) reject(err);
-          if (res && typeof res.body === 'object') {
-            if (res.body.ok) {
-              resolve(res.body.result);
+        .post(this.apiURL + name, data)
+        .then(res => {
+          if (res && typeof res.data === 'object') {
+            if (res.data.ok) {
+              resolve(res.data.result);
             } else {
-              res.body.reqData = data;
-              this.logger.error(res.body);
-              this.listeners.onError(data, res.body);
-              reject(res.body);
+              res.data.reqData = data;
+              this.logger.error(res.data);
+              this.listeners.onError(data, res.data);
+              reject(res.data);
             }
           } else {
-            if (res && res.body) {
-              res.body.reqData = data;
-              this.logger.error(res.body);
-              reject(res.body);
+            if (res && res.data) {
+              res.data.reqData = data;
+              this.logger.error(res.data);
+              reject(res.data);
             } else {
               this.logger.error(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
               reject(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
             }
           }
-        });
+        })
+        .catch(reject);
       } catch(e) {
         this.logger.error(`request error ${e}\nmethod: ${name}, data: ${data}`);
       }
@@ -105,7 +104,7 @@ class API {
         }
       })
       .listen(this.configs.webhook_port, () => {
-        request
+        /*request
           .post(`${this.apiURL}setWebhook`)
           .field('url', this.configs.webhook_ip)
           .attach('certificate', this.configs.certificate_path)
@@ -115,7 +114,7 @@ class API {
             } else {
               console.log(res.body);
             }
-          });
+          });*/
       });
     }
   }
