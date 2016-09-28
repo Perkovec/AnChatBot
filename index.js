@@ -9,7 +9,7 @@ const DailyRotateFile = require('winston-daily-rotate-file');
 
 winston.add(DailyRotateFile, {
   filename: path.join(__dirname, '/logs'),
-  datePattern: '-yyyy-MM-dd.log'
+  datePattern: '-yyyy-MM-dd.log',
 });
 
 const logger = new (winston.Logger)({
@@ -29,16 +29,16 @@ if (config.couchdb.username && config.couchdb.password) {
   DBConfig = {
     auth: {
       user: config.couchdb.username,
-      pass: config.couchdb.password
-    }
-  }
+      pass: config.couchdb.password,
+    },
+  };
 } else {
   DBConfig = {};
 }
 
 const couch = new NodeCouchDb(DBConfig);
 
-couch.uniqid(1000).then(ids => {
+couch.uniqid(1000).then((ids) => {
   couch.ids = ids;
   const OnMsg = new MsgProcessor(API, couch);
 

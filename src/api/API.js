@@ -41,7 +41,7 @@ class API {
             }
           }
         })
-        .catch(() => {
+        .catch((e) => {
           scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${data}`);
           reject(e);
         });
