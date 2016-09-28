@@ -9,6 +9,7 @@ const Help = require('./tasks/help');
 const Kick = require('./tasks/kick');
 const Rename = require('./tasks/rename');
 const Id = require('./tasks/id');
+const Me = require('./tasks/me');
 const BroadcastMessage = require('./tasks/broadcastMessage');
 const BroadcastPlaneMessage = require('./tasks/broadcastPlaneMessage');
 
@@ -22,6 +23,7 @@ const CRegex = {
   kick: /^(\/kick\s)(.*)/i, // 1 group = "/kick ", 2 group = chat_id
   rename: /^(\/rename)\s(\w*)\s(.*)/i, // 1 group = "/rename ", 2 group = chat_id, 3 group = nick
   id: /^(\/id)\s(\w*)\s(\w*)/i, // 1 group = "/id ", 2 group = chat_id, 3 group = new chat_id
+  me: /^(\/me)\s(.*)/i, // 1 group = "/me ", 2 group = text
 };
 
 class MsgProcessor {
@@ -37,6 +39,7 @@ class MsgProcessor {
     this.$kick = new Kick(this.API, this.DB);
     this.$rename = new Rename(this.API, this.DB);
     this.$id = new Id(this.API, this.DB);
+    this.$me = new Me(this.API, this.DB);
     this.broadcastMessage = new BroadcastMessage(this.API, this.DB);
     this.broadcastPlaneMessage = new BroadcastPlaneMessage(this.API, this.DB);
   }
@@ -62,6 +65,9 @@ class MsgProcessor {
     } else if (CRegex.id.test(text)) {
       const matches = text.match(CRegex.id);
       this.$id.process(msg, matches[2], matches[3]);
+    } else if (CRegex.me.test(text)) {
+      const matches = text.match(CRegex.me);
+      this.$me.process(msg, matches[2]);
     } else if (CRegex.some_command.test(text)) {
       msg.sendMessage({
         text: local.unknown_command,

@@ -6,7 +6,7 @@ const TgAPI = require('./src/api/API');
 const API = new TgAPI(config);
 
 const child = new (forever.Monitor)('./index.js', {
-  max: 10,
+  max: 100,
 });
 
 child.on('exit', () => {
