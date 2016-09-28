@@ -72,6 +72,7 @@ class MsgProcessor {
   }
 
   processReqError(msg, err) {
+    if (!err.response) return;
     switch (err.response.status) {
       case 403:
         this.DB.get(
@@ -129,7 +130,7 @@ class MsgProcessor {
         });
         break;
       default:
-        return null;
+        this.API.logger.error(err);
     }
     return null;
   }

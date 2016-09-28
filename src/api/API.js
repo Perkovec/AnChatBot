@@ -43,12 +43,11 @@ class API {
         })
         .catch((e) => {
           this.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
-          if (e.response) {
-            this.listeners.onReqError(data, e, name);
-          }
+          this.listeners.onReqError(data, e, name);
         });
       } catch (e) {
         this.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
+        this.listeners.onReqError(data, e, name);
       }
     });
   }

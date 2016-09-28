@@ -90,6 +90,11 @@ class Start {
   }
 
   $getUid() {
+    if (this.DB.ids.length <= 20) {
+      this.DB.uniqid(1000).then((ids) => {
+        this.DB.ids = ids;
+      });
+    }
     const uid = this.DB.ids[0];
     this.DB.ids = this.DB.ids.slice(1);
     return uid;
