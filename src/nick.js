@@ -7,8 +7,8 @@ class Nickname {
 
     let output = '';
     for (let i = 0; i < syllableCount; i += 1) {
-      output += alphabetS[Nickname.random(0, alphabetS.length - 1)];
-      output += alphabetG[Nickname.random(0, alphabetG.length - 1)];
+      output += alphabetS[Nickname.$random(0, alphabetS.length - 1)];
+      output += alphabetG[Nickname.$random(0, alphabetG.length - 1)];
     }
 
     const nick = output.charAt(0).toUpperCase() + output.slice(1);

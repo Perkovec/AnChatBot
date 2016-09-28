@@ -43,11 +43,12 @@ class API {
         })
         .catch((e) => {
           scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
-          reject(e);
+          if (e.response) {
+            scope.listeners.onReqError(data, e);
+          }
         });
       } catch (e) {
         scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
-        reject(e);
       }
     });
   }
@@ -87,6 +88,10 @@ class API {
 
   onError(listener) {
     this.listeners.onError = listener;
+  }
+
+  onReqError(listener) {
+    this.listeners.onReqError = listener;
   }
 
   run() {

@@ -25,5 +25,6 @@
   "nickname_exists": "[BOT] Извини, но этот ник уже занят.",
   "your_nick_changed": "[BOT] Тебе сменили ник на '{0}'. Ты можешь его изменить с помощью /nick, например\n/nick Петушок",
   "user_not_found": "[BOT] Пользователь не найден.",
-  "unknown_command": "[BOT] Я такой команды не знаю."
+  "unknown_command": "[BOT] Я такой команды не знаю.",
+  "id_updated": "[BOT] id пользователя изменен."
 }

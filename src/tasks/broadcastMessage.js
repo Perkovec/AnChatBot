@@ -232,7 +232,7 @@ class BroadcastMessage {
   $getTextToSend(msg, nickname, template) {
     let text;
     if (msg.caption || !template) {
-      text = msg.caption ? msg.caption : this.$linkShortener(msg);
+      text = msg.caption ? msg.caption : BroadcastMessage.$linkShortener(msg);
       text = `${nickname}: ${text}`;
     } else {
       text = Util.escapeHtml(Util.format(template, [nickname]));
