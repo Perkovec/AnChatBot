@@ -22,51 +22,54 @@ class Start {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_tgid',
-      {key: msg.from.id})
-    .then(({data}) => {
+      { key: msg.from.id })
+    .then(({ data }) => {
       const rows = data.rows;
 
       if (!rows.length) {
         const nickname = Nickname.generate(2);
 
         this.$createNewUser(msg, nickname)
-        .then(({data}) => {
+        .then(() => {
           msg.sendMessage({
             text: Util.format(local.start_new, [nickname]),
           });
 
           this.broadcastPlaneMessage.process(Util.format(local.new_user, [nickname]), msg.from.id);
-        }, console.log);
+        }, this.API.logger.error);
       } else if (rows[0] && !rows[0].value.isChatUser) {
         const newData = Object.assign(rows[0].value, {
           _id: rows[0].id,
-          _rev: rows[0].value._rev,
+          _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
           isChatUser: true,
-          lastMessage: Util.UTCTime()
+          lastMessage: Util.UTCTime(), // eslint-disable-line new-cap
         });
-        
+
         this.DB.update(
           'anchat_users',
           newData)
-        .then(({data}) => {
+        .then(() => {
           msg.sendMessage({
-            text: Util.format(local.start, [rows[0].value.name])
+            text: Util.format(local.start, [rows[0].value.name]),
           });
-          this.broadcastPlaneMessage.process(Util.format(local.entry_user, [rows[0].value.name]), msg.from.id);
+          this.broadcastPlaneMessage.process(
+            Util.format(local.entry_user, [rows[0].value.name]),
+            msg.from.id
+          );
         });
       } else if (rows[0] && rows[0].value.isChatUser) {
         msg.sendMessage({
           text: local.already_in_chat,
         });
       }
-    })
+    });
   }
 
   $createNewUser(msg, nickname) {
     return this.DB.get('anchat_users', '_design/anchat_users/_view/count')
-    .then(({data}) => {
+    .then(({ data }) => {
       const length = (data.rows[0] && data.rows[0].value) || 0;
-      const msgTime = Util.UTCTime();
+      const msgTime = Util.UTCTime(); // eslint-disable-line new-cap
       return this.DB.insert('anchat_users', {
         _id: this.$getUid(),
         tg_id: msg.from.id,
@@ -81,7 +84,7 @@ class Start {
         lastMessage: msgTime,
         userGroup: userGroups.NEWBIE,
         privateMsgs: '',
-        hidden: false
+        hidden: false,
       });
     });
   }

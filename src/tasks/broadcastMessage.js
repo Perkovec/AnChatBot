@@ -11,7 +11,7 @@ class BroadcastMessage {
 
   process(msg) {
     this.$checkUserInChat(msg.from.id)
-    .then(({isChatUser, UserData}) => {
+    .then(({ isChatUser, UserData }) => {
       if (isChatUser) {
         if (msg.text) {
           this.$sendText(msg, UserData);
@@ -30,7 +30,7 @@ class BroadcastMessage {
         }
       } else {
         msg.sendMessage({
-          text: local.not_in_chat
+          text: local.not_in_chat,
         });
       }
     });
@@ -43,14 +43,14 @@ class BroadcastMessage {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_isChatUser')
-    .then(({data}) => {
+    .then(({ data }) => {
       const rows = data.rows;
-      for (let i = 0; i < rows.length; ++i) {
+      for (let i = 0; i < rows.length; i += 1) {
         if (rows[i].key !== msg.from.id) {
           this.API.sendVoice({
             chat_id: rows[i].key,
             voice: msg.voice.file_id,
-            caption: text
+            caption: text,
           });
         }
       }
@@ -65,14 +65,14 @@ class BroadcastMessage {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_isChatUser')
-    .then(({data}) => {
+    .then(({ data }) => {
       const rows = data.rows;
-      for (let i = 0; i < rows.length; ++i) {
+      for (let i = 0; i < rows.length; i += 1) {
         if (rows[i].key !== msg.from.id) {
           this.API.sendVideo({
             chat_id: rows[i].key,
             video: msg.video.file_id,
-            caption: text
+            caption: text,
           });
         }
       }
@@ -87,20 +87,20 @@ class BroadcastMessage {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_isChatUser')
-    .then(({data}) => {
+    .then(({ data }) => {
       const rows = data.rows;
-      for (let i = 0; i < rows.length; ++i) {
+      for (let i = 0; i < rows.length; i += 1) {
         if (rows[i].key !== msg.from.id) {
           this.API.sendMessage({
             chat_id: rows[i].key,
-            text: text
+            text,
           })
           .then(() => {
             this.API.sendSticker({
               chat_id: rows[i].key,
-              sticker: msg.sticker.file_id
+              sticker: msg.sticker.file_id,
             });
-          })
+          });
         }
       }
       this.$updateUserLastMessage(msg.from.id);
@@ -114,14 +114,14 @@ class BroadcastMessage {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_isChatUser')
-    .then(({data}) => {
+    .then(({ data }) => {
       const rows = data.rows;
-      for (let i = 0; i < rows.length; ++i) {
+      for (let i = 0; i < rows.length; i += 1) {
         if (rows[i].key !== msg.from.id) {
           this.API.sendDocument({
             chat_id: rows[i].key,
             document: msg.document.file_id,
-            caption: text
+            caption: text,
           });
         }
       }
@@ -136,15 +136,15 @@ class BroadcastMessage {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_isChatUser')
-    .then(({data}) => {
+    .then(({ data }) => {
       const rows = data.rows;
-      const photo_id = msg.photo[msg.photo.length - 1].file_id;
-      for (let i = 0; i < rows.length; ++i) {
+      const photoId = msg.photo[msg.photo.length - 1].file_id;
+      for (let i = 0; i < rows.length; i += 1) {
         if (rows[i].key !== msg.from.id) {
           this.API.sendPhoto({
             chat_id: rows[i].key,
-            photo: photo_id,
-            caption: text
+            photo: photoId,
+            caption: text,
           });
         }
       }
@@ -159,14 +159,14 @@ class BroadcastMessage {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_isChatUser')
-    .then(({data}) => {
+    .then(({ data }) => {
       const rows = data.rows;
-      for (let i = 0; i < rows.length; ++i) {
+      for (let i = 0; i < rows.length; i += 1) {
         if (rows[i].key !== msg.from.id) {
           this.API.sendAudio({
             chat_id: rows[i].key,
             audio: msg.audio.file_id,
-            caption: text
+            caption: text,
           });
         }
       }
@@ -177,18 +177,18 @@ class BroadcastMessage {
   $sendText(msg, UserData) {
     const nickname = UserData.name;
     const text = this.$getTextToSend(msg, nickname);
-    
+
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_isChatUser')
-    .then(({data}) => {
+    .then(({ data }) => {
       const rows = data.rows;
-      for (let i = 0; i < rows.length; ++i) {
+      for (let i = 0; i < rows.length; i += 1) {
         if (rows[i].key !== msg.from.id) {
           this.API.sendMessage({
             chat_id: rows[i].key,
-            text: text,
-            parse_mode: 'HTML'
+            text,
+            parse_mode: 'HTML',
           });
         }
       }
@@ -201,15 +201,15 @@ class BroadcastMessage {
       this.DB.get(
         'anchat_users',
         '_design/anchat_users/_view/by_tgid',
-        {key: id})
-      .then(({data}) => {
+        { key: id })
+      .then(({ data }) => {
         const rows = data.rows;
         if (!rows.length || !rows[0].value.isChatUser) {
-          resolve({isChatUser: false});
+          resolve({ isChatUser: false });
         } else {
-          resolve({isChatUser: true, UserData: rows[0].value});
+          resolve({ isChatUser: true, UserData: rows[0].value });
         }
-      }, reject)
+      }, reject);
     });
   }
 
@@ -217,13 +217,13 @@ class BroadcastMessage {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_tgid',
-      {key: id})
-    .then(({data}) => {
+      { key: id })
+    .then(({ data }) => {
       const rows = data.rows;
       const newData = Object.assign(rows[0].value, {
         _id: rows[0].id,
-        _rev: rows[0].value._rev,
-        lastMessage: Util.UTCTime()
+        _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
+        lastMessage: Util.UTCTime(), // eslint-disable-line new-cap
       });
       this.DB.update('anchat_users', newData);
     });
@@ -237,35 +237,35 @@ class BroadcastMessage {
     } else {
       text = Util.escapeHtml(Util.format(template, [nickname]));
     }
-    
+
     if (msg.reply_to_message !== null) {
       const reply = msg.reply_to_message;
       let replyText = reply.text || reply.caption;
-      let reply_msg;
+      let replyMsg;
       if (reply.from.id === msg.from.id) {
-        reply_msg = `${nickname}: ${replyText}`;
+        replyMsg = `${nickname}: ${replyText}`;
       } else if (replyText) {
         replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
-        reply_msg = replyText;
+        replyMsg = replyText;
       }
 
-      reply_msg = Util.truncate(reply_msg, 25).replace(/\n/g, ' ');
-      text = Util.format(local.reply_to, [reply_msg, text]);
+      replyMsg = Util.truncate(replyMsg, 25).replace(/\n/g, ' ');
+      text = Util.format(local.reply_to, [replyMsg, text]);
     }
     return text;
   }
 
-  $linkShortener(msg) {
+  static $linkShortener(msg) {
     if (!msg.entities) return msg.text;
 
-    let new_text = Util.escapeHtml(msg.text);
+    let newText = Util.escapeHtml(msg.text);
     const links = linkify.find(msg.text, 'url');
-    for (let i = 0; i < links.length; ++i) {
+    for (let i = 0; i < links.length; i += 1) {
       const link = links[0];
-      new_text = new_text.replace(Util.escapeHtml(link.value), `<a href="${link.href}">${url.parse(link.href).host}...</a>`);
+      newText = newText.replace(Util.escapeHtml(link.value), `<a href="${link.href}">${url.parse(link.href).host}...</a>`);
     }
-    
-    return new_text;
+
+    return newText;
   }
 }
 

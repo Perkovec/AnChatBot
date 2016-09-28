@@ -9,15 +9,15 @@ class List {
 
   process(msg) {
     this.$checkUserInChat(msg.from.id)
-    .then(({isChatUser}) => {
+    .then(({ isChatUser }) => {
       if (isChatUser) {
         msg.sendMessage({
-          text: local.help
+          text: local.help,
         });
         this.$updateUserLastMessage(msg.from.id);
       } else {
         msg.sendMessage({
-          text: local.not_in_chat
+          text: local.not_in_chat,
         });
       }
     });
@@ -28,15 +28,15 @@ class List {
       this.DB.get(
         'anchat_users',
         '_design/anchat_users/_view/by_tgid',
-        {key: id})
-      .then(({data}) => {
+        { key: id })
+      .then(({ data }) => {
         const rows = data.rows;
         if (!rows.length || !rows[0].value.isChatUser) {
-          resolve({isChatUser: false});
+          resolve({ isChatUser: false });
         } else {
-          resolve({isChatUser: true, UserData: rows[0].value});
+          resolve({ isChatUser: true, UserData: rows[0].value });
         }
-      }, reject)
+      }, reject);
     });
   }
 
@@ -44,13 +44,13 @@ class List {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_tgid',
-      {key: id})
-    .then(({data}) => {
+      { key: id })
+    .then(({ data }) => {
       const rows = data.rows;
       const newData = Object.assign(rows[0].value, {
         _id: rows[0].id,
-        _rev: rows[0].value._rev,
-        lastMessage: Util.UTCTime()
+        _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
+        lastMessage: Util.UTCTime(), // eslint-disable-line new-cap
       });
       this.DB.update('anchat_users', newData);
     });

@@ -15,23 +15,26 @@ class Stop {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_tgid',
-      {key: msg.from.id})
-    .then(({data}) => {
+      { key: msg.from.id })
+    .then(({ data }) => {
       const rows = data.rows;
       if (rows.length && rows[0].value.isChatUser) {
         const newData = Object.assign(rows[0].value, {
           _id: rows[0].id,
-          _rev: rows[0].value._rev,
-          isChatUser: false
+          _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
+          isChatUser: false,
         });
         this.DB.update(
           'anchat_users',
           newData)
-        .then(({data}) => {
+        .then(() => {
           msg.sendMessage({
-            text: local.stop
+            text: local.stop,
           });
-          this.broadcastPlaneMessage.process(Util.format(local.leave_chat, [rows[0].value.name]), msg.from.id);
+          this.broadcastPlaneMessage.process(
+            Util.format(local.leave_chat, [rows[0].value.name]),
+            msg.from.id
+          );
         });
       }
     });

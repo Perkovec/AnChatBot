@@ -1,4 +1,3 @@
-const Nickname = require('./nick');
 const Util = require('./util');
 const local = require('./locals/ru.json');
 
@@ -20,13 +19,7 @@ const CRegex = {
   list: /^(\/list)$/i,
   nick: /^(\/nick\s)(.*)/i, // 1 group = "/nick ", 2 group = nickname
   kick: /^(\/kick\s)(.*)/i, // 1 group = "/kick ", 2 group = chat_id
-  rename: /^(\/rename)\s(\w*)\s(.*)/i // 1 group = "/rename ", 2 group = chat_id, 3 group = nickname
-};
-
-const userGroups = {
-  NEWBIE: 0,
-  USER: 1,
-  ADMIN: 100,
+  rename: /^(\/rename)\s(\w*)\s(.*)/i, // 1 group = "/rename ", 2 group = chat_id, 3 group = nick
 };
 
 class MsgProcessor {
@@ -47,7 +40,7 @@ class MsgProcessor {
 
   process(msg) {
     const text = msg.text ? msg.text.trim() : msg.text;
-    
+
     if (CRegex.start.test(text)) {
       this.$start.process(msg);
     } else if (CRegex.stop.test(text)) {
@@ -60,12 +53,12 @@ class MsgProcessor {
       this.$help.process(msg);
     } else if (CRegex.kick.test(text)) {
       this.$kick.process(msg, text.match(CRegex.kick)[2]);
-    }  else if (CRegex.rename.test(text)) {
+    } else if (CRegex.rename.test(text)) {
       const matches = text.match(CRegex.rename);
       this.$rename.process(msg, matches[2], matches[3]);
     } else if (CRegex.some_command.test(text)) {
       msg.sendMessage({
-        text: local.unknown_command
+        text: local.unknown_command,
       });
     } else {
       this.broadcastMessage.process(msg);
@@ -73,30 +66,36 @@ class MsgProcessor {
   }
 
   processError(msg, err) {
-    switch(err.error_code) {
+    switch (err.error_code) {
       case 403:
         this.DB.get(
           'anchat_users',
           '_design/anchat_users/_view/by_tgid',
-          {key: msg.chat_id})
-        .then(({data}) => {
+          { key: msg.chat_id })
+        .then(({ data }) => {
           const rows = data.rows;
           if (rows.length && rows[0].value.isChatUser) {
             const newData = Object.assign(rows[0].value, {
               _id: rows[0].id,
-              _rev: rows[0].value._rev,
-              isChatUser: false
+              _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
+              isChatUser: false,
             });
             this.DB.update(
               'anchat_users',
               newData)
-            .then(({data}) => {
-              this.broadcastPlaneMessage.process(Util.format(local.leave_chat_with_ban, [rows[0].value.name]), msg.chat_id);
+            .then(() => {
+              this.broadcastPlaneMessage.process(
+                Util.format(local.leave_chat_with_ban, [rows[0].value.name]),
+                msg.chat_id
+              );
             });
           }
         });
-      break;
+        break;
+      default:
+        return null;
     }
+    return null;
   }
 }
 

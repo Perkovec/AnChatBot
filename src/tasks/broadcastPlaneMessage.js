@@ -4,17 +4,17 @@ class BroadcastPlaneMessage {
     this.DB = db;
   }
 
-  process(text, exclude_id) {
+  process(text, excludeid) {
     this.DB.get(
       'anchat_users',
       '_design/anchat_users/_view/by_isChatUser')
-    .then(({data}) => {
+    .then(({ data }) => {
       const rows = data.rows;
-      for (let i = 0; i < rows.length; ++i) {
-        if (rows[i].key !== exclude_id) {
+      for (let i = 0; i < rows.length; i += 1) {
+        if (rows[i].key !== excludeid) {
           this.API.sendMessage({
             chat_id: rows[i].key,
-            text: text
+            text,
           });
         }
       }

@@ -14,8 +14,8 @@ class Chat {
   registerMethods() {
     this.sendMessage = (data) => {
       const sendData = Object.assign(data, { chat_id: this.id });
-      return this.$api.sendMessage(data);
-    }
+      return this.$api.sendMessage(sendData);
+    };
   }
 }
 

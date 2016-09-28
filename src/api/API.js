@@ -11,7 +11,7 @@ class API {
     this.offset = 0;
     this.listeners = {};
 
-    process.on('unhandledRejection', (reason, promise) => {this.logger.error(`Unhandled reject: ${reason}`)});
+    process.on('unhandledRejection', (reason) => { this.logger.error(`Unhandled reject: ${reason}`); });
   }
 
   callMethod(name, data) {
@@ -20,32 +20,32 @@ class API {
       try {
         request
         .post(scope.apiURL + name, data)
-        .then(res => {
+        .then((res) => {
           if (res && typeof res.data === 'object') {
             if (res.data.ok) {
               resolve(res.data.result);
             } else {
-              res.data.reqData = data;
-              scope.logger.error(res.data);
-              scope.listeners.onError(data, res.data);
-              reject(res.data);
+              const errData = res.data;
+              errData.reqData = data;
+              scope.logger.error(errData);
+              scope.listeners.onError(data, errData);
+              reject(errData);
             }
+          } else if (res && res.data) {
+            const errData = res.data;
+            errData.reqData = data;
+            scope.logger.error(errData);
+            reject(errData);
           } else {
-            if (res && res.data) {
-              res.data.reqData = data;
-              scope.logger.error(res.data);
-              reject(res.data);
-            } else {
-              scope.logger.error(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
-              reject(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
-            }
+            scope.logger.error(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
+            reject(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
           }
         })
         .catch((e) => {
           scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
           reject(e);
         });
-      } catch(e) {
+      } catch (e) {
         scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
         reject(e);
       }
@@ -77,7 +77,7 @@ class API {
   buildMethods() {
     return {
       sendMessage: this.sendMessage,
-      getFile: this.getFile
+      getFile: this.getFile,
     };
   }
 
@@ -94,24 +94,22 @@ class API {
       this.callMethod('setWebhook', {
         url: '',
       })
-      .then(() => this.polling())
+      .then(() => this.polling());
     } else {
-      http.createServer((request, response) => {
-        console.log(re)
-        if(request.method === "POST") {
-          let requestBody = '';
-          request.on('data', function(data) {
+      http.createServer((req, response) => {
+        if (req.method === 'POST') {
+          let requestBody = ''; // eslint-disable-line no-unused-vars
+          req.on('data', (data) => {
             requestBody += data;
           });
-          request.on('end', function() {
-            conosle.log(requestBody);
+          req.on('end', () => {
             response.writeHead(200);
             response.end();
           });
         }
       })
       .listen(this.configs.webhook_port, () => {
-        /*request
+        /* request
           .post(`${this.apiURL}setWebhook`)
           .field('url', this.configs.webhook_ip)
           .attach('certificate', this.configs.certificate_path)
@@ -121,7 +119,7 @@ class API {
             } else {
               console.log(res.body);
             }
-          });*/
+          }); */
       });
     }
   }
@@ -141,7 +139,7 @@ class API {
   sendPhoto(data) {
     return this.callMethod('sendPhoto', data);
   }
-  
+
   sendDocument(data) {
     return this.callMethod('sendDocument', data);
   }

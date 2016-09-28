@@ -1,23 +1,27 @@
 class Util {
   static format(str, args) {
     let ret = str;
-    for (let i in args) {
-      ret = ret.replace('{'+i+'}', args[i]);
+    for (let i = 0; i < args.length; i += 1) {
+      ret = ret.replace(`{${i}}`, args[i]);
     }
     return ret;
   }
 
   static numberToLetter(num) {
-    let ret, a, b;
-    for (ret = '', a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) {
-      ret = String.fromCharCode(parseInt((num % b) / a) + 65) + ret;
+    let ret;
+    let a;
+    let b;
+    for (ret = '', a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) { // eslint-disable-line
+      ret = String.fromCharCode(parseInt((num % b) / a, 10) + 65) + ret;
     }
     return ret;
   }
 
   static letterToNumber(val) {
     const base = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let i, j, result = 0;
+    let i;
+    let j;
+    let result = 0;
     for (i = 0, j = val.length - 1; i < val.length; i += 1, j -= 1) {
       result += Math.pow(base.length, j) * (base.indexOf(val[i]) + 1);
     }
@@ -40,9 +44,9 @@ class Util {
       } else {
         const hours = Math.floor(minutes / 60);
         if (hours < 24) {
-          text = `был(а) ${hours} ч. назад`
+          text = `был(а) ${hours} ч. назад`;
         } else {
-          text = `был(а) ${Math.floor(hours / 24)} д. назад`
+          text = `был(а) ${Math.floor(hours / 24)} д. назад`;
         }
       }
     }
@@ -51,17 +55,23 @@ class Util {
   }
 
   static sortByKey(array, key) {
-    return array.sort(function(a, b) {
-        var x = a[key]; var y = b[key];
-        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    return array.sort((a, b) => {
+      const x = a[key];
+      const y = b[key];
+      if (x < y) {
+        return -1;
+      } else if (x > y) {
+        return 1;
+      }
+      return 0;
     });
   }
 
   static truncate(text, n, useWordBoundary) {
     const isTooLong = text.length > n;
-    let s_ = isTooLong ? text.substr(0, n - 1) : text;
-    s_ = (useWordBoundary && isTooLong) ? s_.substr(0, s_.lastIndexOf(' ')) : s_;
-    return  isTooLong ? s_ + '…' : s_;
+    let s = isTooLong ? text.substr(0, n - 1) : text;
+    s = (useWordBoundary && isTooLong) ? s.substr(0, s.lastIndexOf(' ')) : s;
+    return isTooLong ? `${s}…` : s;
   }
 
   static cutLines(text, lineCount) {
@@ -73,12 +83,12 @@ class Util {
 
   static escapeHtml(unsafe) {
     return unsafe
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
- }
+         .replace(/&/g, '&amp;')
+         .replace(/</g, '&lt;')
+         .replace(/>/g, '&gt;')
+         .replace(/"/g, '&quot;')
+         .replace(/'/g, '&#039;');
+  }
 }
 
 module.exports = Util;
