@@ -1,3 +1,4 @@
+const Util = require('../util');
 const local = require('../locals/ru.json');
 
 class Id {
@@ -26,7 +27,7 @@ class Id {
           newData)
         .then(() => {
           msg.sendMessage({
-            text: local.id_updated,
+            text: Util.format(local.id_updated, [UserData.name]),
           });
         });
       } else {

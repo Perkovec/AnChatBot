@@ -10,16 +10,16 @@ class API {
     this.apiURL = `https://api.telegram.org/bot${this.token}/`;
     this.offset = 0;
     this.listeners = {};
+    this.$retry = 0;
 
     process.on('unhandledRejection', (reason) => { this.logger.error(`Unhandled reject: ${reason}`); });
   }
 
   callMethod(name, data) {
-    const scope = this;
     return new Promise((resolve, reject) => {
       try {
         request
-        .post(scope.apiURL + name, data)
+        .post(this.apiURL + name, data)
         .then((res) => {
           if (res && typeof res.data === 'object') {
             if (res.data.ok) {
@@ -27,28 +27,28 @@ class API {
             } else {
               const errData = res.data;
               errData.reqData = data;
-              scope.logger.error(errData);
-              scope.listeners.onError(data, errData);
+              this.logger.error(errData);
+              this.listeners.onError(data, errData);
               reject(errData);
             }
           } else if (res && res.data) {
             const errData = res.data;
             errData.reqData = data;
-            scope.logger.error(errData);
+            this.logger.error(errData);
             reject(errData);
           } else {
-            scope.logger.error(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
+            this.logger.error(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
             reject(`no body, method: ${name}, data: ${JSON.stringify(data)}`);
           }
         })
         .catch((e) => {
-          scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
+          this.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
           if (e.response) {
-            scope.listeners.onReqError(data, e);
+            this.listeners.onReqError(data, e, name);
           }
         });
       } catch (e) {
-        scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
+        this.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
       }
     });
   }

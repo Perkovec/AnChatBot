@@ -44,6 +44,11 @@ couch.uniqid(1000).then((ids) => {
 
   API.onMessage(msg => OnMsg.process(msg));
   API.onError((msg, err) => OnMsg.processError(msg, err));
-  API.onReqError((msg, err) => OnMsg.processReqError(msg, err));
+  API.onReqError((msg, err, name) => {
+    OnMsg.processReqError(msg, err);
+    if (name === 'getUpdates') {
+      API.polling();
+    }
+  });
   API.run();
 });
