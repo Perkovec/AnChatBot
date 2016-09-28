@@ -42,11 +42,11 @@ class API {
           }
         })
         .catch((e) => {
-          scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${data}`);
+          scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
           reject(e);
         });
       } catch(e) {
-        scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${data}`);
+        scope.logger.error(`request error ${e}\nmethod: ${name}, data: ${JSON.stringify(data)}`);
         reject(e);
       }
     });
