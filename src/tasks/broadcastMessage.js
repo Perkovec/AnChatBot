@@ -218,7 +218,10 @@ class BroadcastMessage {
           replyMsg = Util.truncate(replyMsg, 25).replace(/\n/g, ' ');
           resolve(Util.format(local.reply_to, [replyMsg, text]));
         } else {
-          resolve(Util.format(local.reply_to, [getReplyText(reply), text]));
+          let replyText = getReplyText(reply);
+          replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
+          replyText = Util.truncate(replyText, 25).replace(/\n/g, ' ');
+          resolve(Util.format(local.reply_to, [replyText, text]));
         }
       }
       
