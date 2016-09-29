@@ -10,14 +10,14 @@ class Id {
   process(msg, userid, newId) {
     if (msg.from.id !== this.API.configs.admin) return;
     this.DB.$getUserByChatId(userid)
-    .then(user => {
+    .then((user) => {
       if (user) {
         this.DB.$updateDocumentFields(user, {
           id: newId.toUpperCase(),
         })
         .then(() => {
           msg.sendMessage({
-            text: Util.format(local.id_updated, [UserData.name]),
+            text: Util.format(local.id_updated, [user.name]),
           });
         });
       } else {

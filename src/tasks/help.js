@@ -1,4 +1,3 @@
-const Util = require('../util');
 const local = require('../locals/ru.json');
 
 class List {
@@ -9,7 +8,7 @@ class List {
 
   process(msg) {
     this.DB.$getUserByTgId(msg.from.id)
-    .then(user => {
+    .then((user) => {
       if (user) {
         msg.sendMessage({
           text: local.help,

@@ -9,10 +9,10 @@ class List {
 
   process(msg) {
     this.DB.$getUserByTgId(msg.from.id)
-    .then(user => {
+    .then((user) => {
       if (user) {
         this.DB.$getChatUsers()
-        .then(users => {
+        .then((users) => {
           let list = '';
           users.sort((a, b) => {
             const x = a.lastMessage;
@@ -27,8 +27,8 @@ class List {
           });
 
           for (let i = 0; i < users.length; i += 1) {
-            const user = users[i];
-            list += `#${user.id} '${user.name}' ${Util.timeDiff2Text(Util.UTCTime() - user.lastMessage)}\n`; // eslint-disable-line new-cap
+            const usr = users[i];
+            list += `#${usr.id} '${usr.name}' ${Util.timeDiff2Text(Util.UTCTime() - usr.lastMessage)}\n`; // eslint-disable-line new-cap
           }
 
           msg.sendMessage({

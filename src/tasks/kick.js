@@ -14,7 +14,7 @@ class Kick {
   process(msg, userid) {
     if (msg.from.id !== this.API.configs.admin) return;
     this.DB.$getUserByChatId(userid)
-    .then(user => {
+    .then((user) => {
       if (user) {
         this.DB.$updateDocumentFields(user, {
           isChatUser: false,
@@ -23,14 +23,14 @@ class Kick {
           this.API.sendMessage({
             chat_id: user.tg_id,
             text: local.user_kicked,
-          }).then(response => {
+          }).then((response) => {
             this.broadcastPlaneMessage.process(
               Util.format(local.user_kicked_public, [user.name]),
               user.tg_id,
               null,
               { id: msg.from.id, message_id: response.message_id }
             );
-          });      
+          });
         });
       } else {
         msg.sendMessage({

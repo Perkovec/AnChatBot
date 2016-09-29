@@ -13,7 +13,7 @@ class Me {
 
   process(msg, text) {
     this.DB.$getUserByTgId(msg.from.id)
-    .then(user => {
+    .then((user) => {
       if (user) {
         this.broadcastPlaneMessage.process(
           Util.format(local.me, [user.name, Util.escapeHtml(text)]),

@@ -5,7 +5,7 @@ class BroadcastPlaneMessage {
   }
 
   process(text, excludeid, parsemode, self) {
-    function onSendEnd(value, userMsg) {
+    function onSendEnd(value) {
       const document = {
         _id: `message${new Date().getTime()}`,
       };
@@ -17,23 +17,26 @@ class BroadcastPlaneMessage {
       if (self) {
         document[`user_${self.id}`] = self.message_id;
       }
-         
+
       this.DB.insert('anchat_messages', document);
     }
 
     this.DB.$getChatUsers()
-    .then(users => {
+    .then((users) => {
       const promises = [];
       for (let i = 0; i < users.length; i += 1) {
         if (users[i].tg_id !== excludeid) {
           const sendData = {
             chat_id: users[i].tg_id,
             text,
-          }
+          };
           if (parsemode) sendData.parse_mode = parsemode;
           promises.push(
             this.API.sendMessage(sendData)
-            .then(response => {return {['user_' + users[i].tg_id]: response.message_id}})
+            .then((response) => {
+              const rt = { [`user_${users[i].tg_id}`]: response.message_id };
+              return rt;
+            })
           );
         }
       }

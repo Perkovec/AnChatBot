@@ -20,7 +20,7 @@ class Start {
 
   process(msg) {
     this.DB.$getUserByTgId(msg.from.id)
-    .then(user => {
+    .then((user) => {
       if (!user) {
         const nickname = Nickname.generate(2);
 
@@ -41,7 +41,7 @@ class Start {
           msg.sendMessage({
             text: Util.format(local.start, [user.name]),
           })
-          .then(response => {
+          .then((response) => {
             this.broadcastPlaneMessage.process(
               Util.format(local.entry_user, [user.name]),
               msg.from.id,
@@ -55,7 +55,7 @@ class Start {
           text: local.already_in_chat,
         });
       }
-    })
+    });
   }
 
   $createNewUser(msg, nickname) {

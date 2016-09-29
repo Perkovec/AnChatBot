@@ -14,7 +14,7 @@ class Rename {
   process(msg, userid, newNickname) {
     if (msg.from.id !== this.API.configs.admin) return;
     this.DB.$getUserByChatId(userid)
-    .then(user => {
+    .then((user) => {
       if (user) {
         const oldNickname = user.name;
         this.DB.$updateDocumentFields(user, {

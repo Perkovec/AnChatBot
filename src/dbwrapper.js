@@ -19,7 +19,8 @@ class DBWrapper {
       '_design/anchat_users/_view/by_tgid',
       { key: userId })
     .then(({ data }) => {
-      return data.rows && data.rows.length > 0 ? data.rows[0].value : null;
+      const user = data.rows && data.rows.length > 0 ? data.rows[0].value : null;
+      return user;
     });
   }
 
@@ -29,7 +30,8 @@ class DBWrapper {
       '_design/anchat_users/_view/by_nick',
       { key: userId })
     .then(({ data }) => {
-      return data.rows && data.rows.length > 0 ? data.rows[0].value : null;
+      const user = data.rows && data.rows.length > 0 ? data.rows[0].value : null;
+      return user;
     });
   }
 
@@ -39,7 +41,8 @@ class DBWrapper {
       '_design/anchat_users/_view/by_chatid',
       { key: chatId.toUpperCase() })
     .then(({ data }) => {
-      return data.rows && data.rows.length > 0 ? data.rows[0].value : null;
+      const user = data.rows && data.rows.length > 0 ? data.rows[0].value : null;
+      return user;
     });
   }
 
@@ -47,7 +50,7 @@ class DBWrapper {
     const newData = Object.assign(data, fields);
     return this.update(
       'anchat_users',
-      newData)
+      newData);
   }
 
   static $getChatUsers() {
@@ -78,9 +81,9 @@ class DBWrapper {
   static $getRepliesById(id) {
     function findInArray(msgArr, value) {
       for (let i = 0; i < msgArr.length; i += 1) {
-        if (typeof(msgArr[i]) === 'number' && msgArr[i] == value) {
+        if (typeof msgArr[i] === 'number' && msgArr[i] === value) {
           return true;
-        } else if (typeof(msgArr[i]) === 'object') {
+        } else if (typeof msgArr[i] === 'object') {
           const keys = Object.keys(msgArr[i]);
           for (let j = 0; j < keys.length; j += 1) {
             if (msgArr[i][keys[j]] === value) {

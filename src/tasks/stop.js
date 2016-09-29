@@ -13,7 +13,7 @@ class Stop {
 
   process(msg) {
     this.DB.$getUserByTgId(msg.from.id)
-    .then(user => {
+    .then((user) => {
       if (user) {
         this.DB.$updateDocumentFields(user, {
           isChatUser: false,
@@ -22,7 +22,7 @@ class Stop {
           msg.sendMessage({
             text: local.stop,
           })
-          .then(response => {
+          .then((response) => {
             this.broadcastPlaneMessage.process(
               Util.format(local.leave_chat, [user.name]),
               msg.from.id,

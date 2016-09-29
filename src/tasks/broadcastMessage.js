@@ -1,5 +1,3 @@
-const url = require('url');
-const linkify = require('linkifyjs');
 const Util = require('../util');
 const local = require('../locals/ru.json');
 
@@ -11,7 +9,7 @@ class BroadcastMessage {
 
   process(msg) {
     this.DB.$getUserByTgId(msg.from.id)
-    .then(user => {
+    .then((user) => {
       if (user && user.isChatUser) {
         if (msg.text) {
           this.$sendText(msg, user);
@@ -47,43 +45,43 @@ class BroadcastMessage {
         document[key] = value[i][key];
       }
       document[`user_${data.msg.from.id}`] = data.msg.message_id;
-          
+
       this.DB.insert('anchat_messages', document);
     }
-    
+
     const nickname = data.user.name;
-    this.$getTextToSend(data.msg, nickname, data.template)
-    .then(text => {
+    BroadcastMessage.$getTextToSend(data.msg, nickname, data.template)
+    .then((text) => {
       this.DB.$getChatUsers()
-      .then(users => {
+      .then((users) => {
         if (data.msg.reply_to_message) {
           this.DB.$getRepliesById(data.msg.reply_to_message.message_id)
-          .then(replies => {
-            let promises = [];
+          .then((replies) => {
+            const promises = [];
             for (let i = 0; i < users.length; i += 1) {
               if (users[i].tg_id !== data.msg.from.id) {
                 let reply;
                 if (replies) {
                   if (replies.reply_key) {
                     reply = replies.replies[`user_${users[i].tg_id}`];
-                    if (typeof(reply) === 'object') {
+                    if (typeof reply === 'object') {
                       reply = reply[replies.reply_key];
                     }
                   } else {
                     reply = replies[`user_${users[i].tg_id}`];
                   }
 
-                  if (typeof(reply) === 'object') {
+                  if (typeof reply === 'object') {
                     reply = reply.sticker;
                   }
-                }          
+                }
                 promises.push(data.cb(users[i], text, reply));
               }
             }
             Promise.all(promises).then(value => onSendEnd.bind(this)(value));
           });
         } else {
-          let promises = [];
+          const promises = [];
           for (let i = 0; i < users.length; i += 1) {
             if (users[i].tg_id !== data.msg.from.id) {
               promises.push(data.cb(users[i], text));
@@ -91,11 +89,11 @@ class BroadcastMessage {
           }
           Promise.all(promises).then(value => onSendEnd.bind(this)(value));
         }
-        
+
         this.DB.$updateUserLastMessage(data.msg.from.id);
       });
     });
-  };
+  }
 
   $sendVoice(msg, user) {
     const API = this.API;
@@ -109,8 +107,11 @@ class BroadcastMessage {
           voice: msg.voice.file_id,
           caption: text,
           reply_to_message_id: replyId,
-        }).then(response => {return {['user_' + receiver.tg_id]: response.message_id}});
-      }
+        }).then((response) => {
+          const rt = { [`user_${receiver.tg_id}`]: response.message_id };
+          return rt;
+        });
+      },
     });
   }
 
@@ -126,8 +127,11 @@ class BroadcastMessage {
           video: msg.video.file_id,
           caption: text,
           reply_to_message_id: replyId,
-        }).then(response => {return {['user_' + receiver.tg_id]: response.message_id}});
-      }
+        }).then((response) => {
+          const rt = { [`user_${receiver.tg_id}`]: response.message_id };
+          return rt;
+        });
+      },
     });
   }
 
@@ -142,17 +146,19 @@ class BroadcastMessage {
         return API.sendMessage({
           chat_id: receiver.tg_id,
           text,
+          reply_to_message_id: replyId,
         })
-        .then(response => {
+        .then((response) => {
           firstId = response.message_id;
           return API.sendSticker({
             chat_id: receiver.tg_id,
             sticker: msg.sticker.file_id,
           });
-        }).then(response => {
-          return {['user_' + receiver.tg_id]: {text: firstId, sticker: response.message_id}}
+        }).then((response) => {
+          const rt = { [`user_${receiver.tg_id}`]: { text: firstId, sticker: response.message_id } };
+          return rt;
         });
-      }
+      },
     });
   }
 
@@ -168,8 +174,11 @@ class BroadcastMessage {
           document: msg.document.file_id,
           caption: text,
           reply_to_message_id: replyId,
-        }).then(response => {return {['user_' + receiver.tg_id]: response.message_id}});
-      }
+        }).then((response) => {
+          const rt = { [`user_${receiver.tg_id}`]: response.message_id };
+          return rt;
+        });
+      },
     });
   }
 
@@ -186,8 +195,11 @@ class BroadcastMessage {
           photo: photoId,
           caption: text,
           reply_to_message_id: replyId,
-        }).then(response => {return {['user_' + receiver.tg_id]: response.message_id}});
-      }
+        }).then((response) => {
+          const rt = { [`user_${receiver.tg_id}`]: response.message_id };
+          return rt;
+        });
+      },
     });
   }
 
@@ -203,8 +215,11 @@ class BroadcastMessage {
           audio: msg.audio.file_id,
           caption: text,
           reply_to_message_id: replyId,
-        }).then(response => {return {['user_' + receiver.tg_id]: response.message_id}});
-      }
+        }).then((response) => {
+          const rt = { [`user_${receiver.tg_id}`]: response.message_id };
+          return rt;
+        });
+      },
     });
   }
 
@@ -219,13 +234,16 @@ class BroadcastMessage {
           text,
           parse_mode: 'HTML',
           reply_to_message_id: replyId,
-        }).then(response => {return {['user_' + receiver.tg_id]: response.message_id}});
-      }
+        }).then((response) => {
+          const rt = { [`user_${receiver.tg_id}`]: response.message_id };
+          return rt;
+        });
+      },
     });
   }
-  
-  $getTextToSend(msg, nickname, template) {
-    return new Promise((resolve, reject) => {
+
+  static $getTextToSend(msg, nickname, template) {
+    return new Promise((resolve) => {
       let text = '';
       if (msg.caption || (!template && msg.text)) {
         text = msg.caption ? msg.caption : Util.linkShortener(msg.text);
@@ -233,7 +251,7 @@ class BroadcastMessage {
       } else {
         text = Util.escapeHtml(Util.format(template, [nickname]));
       }
-      
+
       resolve(text);
     });
   }

@@ -13,7 +13,7 @@ class Nick {
 
   process(msg, newNickname) {
     this.DB.$getUserByTgId(msg.from.id)
-    .then(user => {
+    .then((user) => {
       if (user) {
         const nick = newNickname.trim();
         if (nick.length < 1) {
@@ -22,7 +22,7 @@ class Nick {
           });
         } else {
           this.DB.$getUserByNickname(nick)
-          .then(contains => {
+          .then((contains) => {
             if (!contains) {
               const oldNickname = user.name;
               this.DB.$updateDocumentFields(user, {
@@ -32,7 +32,7 @@ class Nick {
               .then(() => {
                 msg.sendMessage({
                   text: Util.format(local.new_nick, [nick]),
-                }).then(response => {
+                }).then((response) => {
                   this.broadcastPlaneMessage.process(
                     Util.format(local.new_user_nick, [oldNickname, nick]),
                     msg.from.id,
@@ -46,7 +46,7 @@ class Nick {
                 text: local.nickname_exists,
               });
             }
-          })
+          });
         }
       } else {
         msg.sendMessage({

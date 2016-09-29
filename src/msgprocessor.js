@@ -105,6 +105,8 @@ class MsgProcessor {
           }
         });
         break;
+      default:
+        this.API.logger.warn(err.response.status);
     }
   }
 
