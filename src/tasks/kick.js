@@ -13,30 +13,25 @@ class Kick {
 
   process(msg, userid) {
     if (msg.from.id !== this.API.configs.admin) return;
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_chatid',
-      { key: userid.toUpperCase() })
-    .then(({ data }) => {
-      const rows = data.rows;
-      if (rows.length && rows[0].value.isChatUser) {
-        const newData = Object.assign(rows[0].value, {
-          _id: rows[0].id,
-          _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
+    this.DB.$getUserByChatId(userid)
+    .then(user => {
+      if (user) {
+        this.DB.$updateDocumentFields(user, {
           isChatUser: false,
-        });
-        this.DB.update(
-          'anchat_users',
-          newData)
+        })
         .then(() => {
           this.API.sendMessage({
-            chat_id: rows[0].value.tg_id,
+            chat_id: user.tg_id,
             text: local.user_kicked,
           });
           this.broadcastPlaneMessage.process(
-            Util.format(local.user_kicked_public, [rows[0].value.name]),
-            rows[0].value.tg_id
+            Util.format(local.user_kicked_public, [user.name]),
+            user.tg_id
           );
+        });
+      } else {
+        msg.sendMessage({
+          text: local.user_not_found,
         });
       }
     });

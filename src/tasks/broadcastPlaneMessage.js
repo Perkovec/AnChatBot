@@ -5,15 +5,12 @@ class BroadcastPlaneMessage {
   }
 
   process(text, excludeid, parsemode) {
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_isChatUser')
-    .then(({ data }) => {
-      const rows = data.rows;
-      for (let i = 0; i < rows.length; i += 1) {
-        if (rows[i].key !== excludeid) {
+    this.DB.$getChatUsers()
+    .then(users => {
+      for (let i = 0; i < users.length; i += 1) {
+        if (users[i].tg_id !== excludeid) {
           const sendData = {
-            chat_id: rows[i].key,
+            chat_id: users[i].tg_id,
             text,
           }
           if (parsemode) sendData.parse_mode = parsemode;

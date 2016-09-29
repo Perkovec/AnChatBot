@@ -10,23 +10,23 @@ class BroadcastMessage {
   }
 
   process(msg) {
-    this.$checkUserInChat(msg.from.id)
-    .then(({ isChatUser, UserData }) => {
-      if (isChatUser) {
+    this.DB.$getUserByTgId(msg.from.id)
+    .then(user => {
+      if (user && user.isChatUser) {
         if (msg.text) {
-          this.$sendText(msg, UserData);
+          this.$sendText(msg, user);
         } else if (msg.audio) {
-          this.$sendAudio(msg, UserData);
+          this.$sendAudio(msg, user);
         } else if (msg.photo) {
-          this.$sendPhoto(msg, UserData);
+          this.$sendPhoto(msg, user);
         } else if (msg.document) {
-          this.$sendDocument(msg, UserData);
+          this.$sendDocument(msg, user);
         } else if (msg.sticker) {
-          this.$sendSticker(msg, UserData);
+          this.$sendSticker(msg, user);
         } else if (msg.video) {
-          this.$sendVideo(msg, UserData);
+          this.$sendVideo(msg, user);
         } else if (msg.voice) {
-          this.$sendVoice(msg, UserData);
+          this.$sendVoice(msg, user);
         }
       } else {
         msg.sendMessage({
@@ -36,236 +36,194 @@ class BroadcastMessage {
     });
   }
 
-  $sendVoice(msg, UserData) {
-    const nickname = UserData.name;
-    const text = this.$getTextToSend(msg, nickname, local.voice_from_user);
-
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_isChatUser')
-    .then(({ data }) => {
-      const rows = data.rows;
-      for (let i = 0; i < rows.length; i += 1) {
-        if (rows[i].key !== msg.from.id) {
-          this.API.sendVoice({
-            chat_id: rows[i].key,
-            voice: msg.voice.file_id,
-            caption: text,
-          });
+  $sendEach(data) {
+    const nickname = data.user.name;
+    this.$getTextToSend(data.msg, nickname, data.template)
+    .then(text => {
+      this.DB.$getChatUsers()
+      .then(users => {
+        for (let i = 0; i < users.length; i += 1) {
+          if (users[i].tg_id !== data.msg.from.id) {
+            data.cb(users[i], text);
+          }
         }
-      }
-      this.$updateUserLastMessage(msg.from.id);
-    });
-  }
-
-  $sendVideo(msg, UserData) {
-    const nickname = UserData.name;
-    const text = this.$getTextToSend(msg, nickname, local.video_from_user);
-
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_isChatUser')
-    .then(({ data }) => {
-      const rows = data.rows;
-      for (let i = 0; i < rows.length; i += 1) {
-        if (rows[i].key !== msg.from.id) {
-          this.API.sendVideo({
-            chat_id: rows[i].key,
-            video: msg.video.file_id,
-            caption: text,
-          });
-        }
-      }
-      this.$updateUserLastMessage(msg.from.id);
-    });
-  }
-
-  $sendSticker(msg, UserData) {
-    const nickname = UserData.name;
-    const text = this.$getTextToSend(msg, nickname, local.sticker_from_user);
-
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_isChatUser')
-    .then(({ data }) => {
-      const rows = data.rows;
-      for (let i = 0; i < rows.length; i += 1) {
-        if (rows[i].key !== msg.from.id) {
-          this.API.sendMessage({
-            chat_id: rows[i].key,
-            text,
-          })
-          .then(() => {
-            this.API.sendSticker({
-              chat_id: rows[i].key,
-              sticker: msg.sticker.file_id,
-            });
-          });
-        }
-      }
-      this.$updateUserLastMessage(msg.from.id);
-    });
-  }
-
-  $sendDocument(msg, UserData) {
-    const nickname = UserData.name;
-    const text = this.$getTextToSend(msg, nickname, local.document_from_user);
-
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_isChatUser')
-    .then(({ data }) => {
-      const rows = data.rows;
-      for (let i = 0; i < rows.length; i += 1) {
-        if (rows[i].key !== msg.from.id) {
-          this.API.sendDocument({
-            chat_id: rows[i].key,
-            document: msg.document.file_id,
-            caption: text,
-          });
-        }
-      }
-      this.$updateUserLastMessage(msg.from.id);
-    });
-  }
-
-  $sendPhoto(msg, UserData) {
-    const nickname = UserData.name;
-    const text = this.$getTextToSend(msg, nickname, local.photo_from_user);
-
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_isChatUser')
-    .then(({ data }) => {
-      const rows = data.rows;
-      const photoId = msg.photo[msg.photo.length - 1].file_id;
-      for (let i = 0; i < rows.length; i += 1) {
-        if (rows[i].key !== msg.from.id) {
-          this.API.sendPhoto({
-            chat_id: rows[i].key,
-            photo: photoId,
-            caption: text,
-          });
-        }
-      }
-      this.$updateUserLastMessage(msg.from.id);
-    });
-  }
-
-  $sendAudio(msg, UserData) {
-    const nickname = UserData.name;
-    const text = this.$getTextToSend(msg, nickname, local.audio_from_user);
-
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_isChatUser')
-    .then(({ data }) => {
-      const rows = data.rows;
-      for (let i = 0; i < rows.length; i += 1) {
-        if (rows[i].key !== msg.from.id) {
-          this.API.sendAudio({
-            chat_id: rows[i].key,
-            audio: msg.audio.file_id,
-            caption: text,
-          });
-        }
-      }
-      this.$updateUserLastMessage(msg.from.id);
-    });
-  }
-
-  $sendText(msg, UserData) {
-    const nickname = UserData.name;
-    const text = this.$getTextToSend(msg, nickname);
-
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_isChatUser')
-    .then(({ data }) => {
-      const rows = data.rows;
-      for (let i = 0; i < rows.length; i += 1) {
-        if (rows[i].key !== msg.from.id) {
-          this.API.sendMessage({
-            chat_id: rows[i].key,
-            text,
-            parse_mode: 'HTML',
-          });
-        }
-      }
-      this.$updateUserLastMessage(msg.from.id);
-    });
-  }
-
-  $checkUserInChat(id) {
-    return new Promise((resolve, reject) => {
-      this.DB.get(
-        'anchat_users',
-        '_design/anchat_users/_view/by_tgid',
-        { key: id })
-      .then(({ data }) => {
-        const rows = data.rows;
-        if (!rows.length || !rows[0].value.isChatUser) {
-          resolve({ isChatUser: false });
-        } else {
-          resolve({ isChatUser: true, UserData: rows[0].value });
-        }
-      }, reject);
-    });
-  }
-
-  $updateUserLastMessage(id) {
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_tgid',
-      { key: id })
-    .then(({ data }) => {
-      const rows = data.rows;
-      const newData = Object.assign(rows[0].value, {
-        _id: rows[0].id,
-        _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
-        lastMessage: Util.UTCTime(), // eslint-disable-line new-cap
+        this.DB.$updateUserLastMessage(data.msg.from.id);
       });
-      this.DB.update('anchat_users', newData);
+    });
+  };
+
+  $sendVoice(msg, user) {
+    const API = this.API;
+    this.$sendEach({
+      msg,
+      user,
+      template: local.voice_from_user,
+      cb(receiver, text) {
+        API.sendVoice({
+          chat_id: receiver.tg_id,
+          voice: msg.voice.file_id,
+          caption: text,
+        });
+      }
     });
   }
 
-  $getTextToSend(msg, nickname, template) {
-    let text;
-    if (msg.caption || !template) {
-      text = msg.caption ? msg.caption : BroadcastMessage.$linkShortener(msg);
-      text = `${nickname}: ${text}`;
-    } else {
-      text = Util.escapeHtml(Util.format(template, [nickname]));
-    }
-
-    if (msg.reply_to_message !== null) {
-      const reply = msg.reply_to_message;
-      let replyText = reply.text || reply.caption;
-      let replyMsg;
-      if (reply.from.id === msg.from.id) {
-        replyMsg = `${nickname}: ${replyText}`;
-      } else if (replyText) {
-        replyText = replyText.startsWith('В ответ на:') ? Util.cutLines(replyText, 3) : replyText;
-        replyMsg = replyText;
+  $sendVideo(msg, user) {
+    const API = this.API;
+    this.$sendEach({
+      msg,
+      user,
+      template: local.video_from_user,
+      cb(receiver, text) {
+        API.sendVideo({
+          chat_id: receiver.tg_id,
+          video: msg.video.file_id,
+          caption: text,
+        });
       }
-
-      replyMsg = Util.truncate(replyMsg, 25).replace(/\n/g, ' ');
-      text = Util.format(local.reply_to, [replyMsg, text]);
-    }
-    return text;
+    });
   }
 
-  static $linkShortener(msg) {
-    if (!msg.entities) return msg.text;
+  $sendSticker(msg, user) {
+    const API = this.API;
+    this.$sendEach({
+      msg,
+      user,
+      template: local.sticker_from_user,
+      cb(receiver, text) {
+        API.sendMessage({
+          chat_id: receiver.tg_id,
+          text,
+        })
+        .then(() => {
+          API.sendSticker({
+            chat_id: receiver.tg_id,
+            sticker: msg.sticker.file_id,
+          });
+        });
+      }
+    });
+  }
 
-    let newText = Util.escapeHtml(msg.text);
-    const links = linkify.find(msg.text, 'url');
-    for (let i = 0; i < links.length; i += 1) {
-      const link = links[0];
-      newText = newText.replace(Util.escapeHtml(link.value), `<a href="${link.href}">${url.parse(link.href).host}...</a>`);
+  $sendDocument(msg, user) {
+    const API = this.API;
+    this.$sendEach({
+      msg,
+      user,
+      template: local.document_from_user,
+      cb(receiver, text) {
+        API.sendDocument({
+          chat_id: receiver.tg_id,
+          document: msg.document.file_id,
+          caption: text,
+        });
+      }
+    });
+  }
+
+  $sendPhoto(msg, user) {
+    const API = this.API;
+    const photoId = msg.photo[msg.photo.length - 1].file_id;
+    this.$sendEach({
+      msg,
+      user,
+      template: local.photo_from_user,
+      cb(receiver, text) {
+        API.sendPhoto({
+          chat_id: receiver.tg_id,
+          photo: photoId,
+          caption: text,
+        });
+      }
+    });
+  }
+
+  $sendAudio(msg, user) {
+    const API = this.API;
+    this.$sendEach({
+      msg,
+      user,
+      template: local.audio_from_user,
+      cb(receiver, text) {
+        API.sendDocument({
+          chat_id: receiver.tg_id,
+          audio: msg.audio.file_id,
+          caption: text,
+        });
+      }
+    });
+  }
+
+  $sendText(msg, user) {
+    const API = this.API;
+    this.$sendEach({
+      msg,
+      user,
+      cb(receiver, text) {
+        API.sendMessage({
+          chat_id: receiver.tg_id,
+          text,
+          parse_mode: 'HTML',
+        });
+      }
+    });
+  }
+  
+  $getTextToSend(msg, nickname, template) {
+    function getReplyText(reply) {
+      if (!reply.text && !reply.caption) {
+        if (reply.sticker) {
+          return local.reply_to_sticker;
+        }
+      } else {
+        return (reply.text || reply.caption);
+      }
     }
 
-    return newText;
+    function getReplyFormatText(reply) {
+      if (reply.photo) {
+        return local.photo_from_user;
+      } else if (reply.audio) {
+        return local.audio_from_user;
+      } else if (reply.document) {
+        return local.document_from_user;
+      } else if (reply.sticker) {
+        return local.sticker_from_user;
+      } else if (reply.video) {
+        return local.video_from_user;
+      } else if (reply.voice) {
+        return local.voice_from_user;
+      }
+    }
+
+    return new Promise((resolve, reject) => {
+      let text = '';
+      if (msg.caption || (!template && msg.text)) {
+        text = msg.caption ? msg.caption : Util.linkShortener(msg.text);
+        text = `${nickname}: ${text}`;
+      } else {
+        text = Util.escapeHtml(Util.format(template, [nickname]));
+      }
+
+      if (msg.reply_to_message) {
+        const reply = msg.reply_to_message;
+        if (reply.from.id === msg.from.id) {
+          const replyText = getReplyText(reply);
+          let replyMsg;
+          if (getReplyText(reply)) {
+            replyMsg = `${nickname}: ${replyText}`;
+          } else {
+            replyMsg = Util.format(getReplyFormatText(reply), [nickname]);
+          }
+          replyMsg = Util.truncate(replyMsg, 25).replace(/\n/g, ' ');
+          resolve(Util.format(local.reply_to, [replyMsg, text]));
+        } else {
+          resolve(Util.format(local.reply_to, [getReplyText(reply), text]));
+        }
+      }
+      
+      resolve(text);
+    });
   }
 }
 

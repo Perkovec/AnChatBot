@@ -9,22 +9,12 @@ class Id {
 
   process(msg, userid, newId) {
     if (msg.from.id !== this.API.configs.admin) return;
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_chatid',
-      { key: userid.toUpperCase() })
-    .then(({ data }) => {
-      const rows = data.rows;
-      if (rows.length > 0) {
-        const UserData = rows[0].value;
-        const newData = Object.assign(UserData, {
-          _id: UserData._id, // eslint-disable-line no-underscore-dangle
-          _rev: UserData._rev, // eslint-disable-line no-underscore-dangle
+    this.DB.$getUserByChatId(userid)
+    .then(user => {
+      if (user) {
+        this.DB.$updateDocumentFields(user, {
           id: newId.toUpperCase(),
-        });
-        this.DB.update(
-          'anchat_users',
-          newData)
+        })
         .then(() => {
           msg.sendMessage({
             text: Util.format(local.id_updated, [UserData.name]),

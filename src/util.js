@@ -1,3 +1,6 @@
+const linkify = require('linkifyjs');
+const url = require('url');
+
 class Util {
   static format(str, args) {
     let ret = str;
@@ -88,6 +91,17 @@ class Util {
          .replace(/>/g, '&gt;')
          .replace(/"/g, '&quot;')
          .replace(/'/g, '&#039;');
+  }
+
+  static linkShortener(text) {
+    let newText = Util.escapeHtml(text);
+    const links = linkify.find(text, 'url');
+    for (let i = 0; i < links.length; i += 1) {
+      const link = links[0];
+      newText = newText.replace(Util.escapeHtml(link.value), `<a href="${link.href}">${url.parse(link.href).host}...</a>`);
+    }
+
+    return newText;
   }
 }
 

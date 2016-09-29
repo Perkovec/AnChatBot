@@ -1,6 +1,7 @@
 const winston = require('winston');
 const path = require('path');
 const NodeCouchDb = require('node-couchdb');
+const DBWrapper = require('./src/dbwrapper');
 const TgAPI = require('./src/api/API');
 const config = require('./config.json');
 const MsgProcessor = require('./src/msgprocessor');
@@ -36,7 +37,7 @@ if (config.couchdb.username && config.couchdb.password) {
   DBConfig = {};
 }
 
-const couch = new NodeCouchDb(DBConfig);
+const couch = DBWrapper.wrap(new NodeCouchDb(DBConfig));
 
 couch.uniqid(1000).then((ids) => {
   couch.ids = ids;

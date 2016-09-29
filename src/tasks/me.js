@@ -12,11 +12,11 @@ class Me {
   }
 
   process(msg, text) {
-    this.$checkUserInChat(msg.from.id)
-    .then(({ isChatUser, UserData }) => {
-      if (isChatUser) {
+    this.DB.$getUserByTgId(msg.from.id)
+    .then(user => {
+      if (user) {
         this.broadcastPlaneMessage.process(
-          Util.format(local.me, [UserData.name, Util.escapeHtml(text)]),
+          Util.format(local.me, [user.name, Util.escapeHtml(text)]),
           msg.from.id,
           'HTML'
         );
@@ -25,23 +25,6 @@ class Me {
           text: local.not_in_chat,
         });
       }
-    });
-  }
-
-  $checkUserInChat(id) {
-    return new Promise((resolve, reject) => {
-      this.DB.get(
-        'anchat_users',
-        '_design/anchat_users/_view/by_tgid',
-        { key: id })
-      .then(({ data }) => {
-        const rows = data.rows;
-        if (!rows.length || !rows[0].value.isChatUser) {
-          resolve({ isChatUser: false });
-        } else {
-          resolve({ isChatUser: true, UserData: rows[0].value });
-        }
-      }, reject);
     });
   }
 }

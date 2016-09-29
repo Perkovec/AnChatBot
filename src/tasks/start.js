@@ -19,14 +19,9 @@ class Start {
   }
 
   process(msg) {
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_tgid',
-      { key: msg.from.id })
-    .then(({ data }) => {
-      const rows = data.rows;
-
-      if (!rows.length) {
+    this.DB.$getUserByTgId(msg.from.id)
+    .then(user => {
+      if (!user) {
         const nickname = Nickname.generate(2);
 
         this.$createNewUser(msg, nickname)
@@ -36,33 +31,27 @@ class Start {
           });
 
           this.broadcastPlaneMessage.process(Util.format(local.new_user, [nickname]), msg.from.id);
-        }, this.API.logger.error);
-      } else if (rows[0] && !rows[0].value.isChatUser) {
-        const newData = Object.assign(rows[0].value, {
-          _id: rows[0].id,
-          _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
+        });
+      } else if (!user.isChatUser) {
+        this.DB.$updateDocumentFields(user, {
           isChatUser: true,
           lastMessage: Util.UTCTime(), // eslint-disable-line new-cap
-        });
-
-        this.DB.update(
-          'anchat_users',
-          newData)
+        })
         .then(() => {
           msg.sendMessage({
-            text: Util.format(local.start, [rows[0].value.name]),
+            text: Util.format(local.start, [user.name]),
           });
           this.broadcastPlaneMessage.process(
-            Util.format(local.entry_user, [rows[0].value.name]),
+            Util.format(local.entry_user, [user.name]),
             msg.from.id
           );
         });
-      } else if (rows[0] && rows[0].value.isChatUser) {
+      } else {
         msg.sendMessage({
           text: local.already_in_chat,
         });
       }
-    });
+    })
   }
 
   $createNewUser(msg, nickname) {
@@ -75,7 +64,6 @@ class Start {
         tg_id: msg.from.id,
         id: Util.numberToLetter(length + 1),
         name: nickname,
-        achieves: '',
         startDate: msgTime,
         banned: false,
         muted: false,

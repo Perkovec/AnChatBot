@@ -8,19 +8,15 @@ class List {
   }
 
   process(msg) {
-    this.$checkUserInChat(msg.from.id)
-    .then(({ isChatUser }) => {
-      if (isChatUser) {
-        this.DB.get(
-          'anchat_users',
-          '_design/anchat_users/_view/by_isChatUser')
-        .then(({ data }) => {
+    this.DB.$getUserByTgId(msg.from.id)
+    .then(user => {
+      if (user) {
+        this.DB.$getChatUsers()
+        .then(users => {
           let list = '';
-          const rows = data.rows;
-
-          rows.sort((a, b) => {
-            const x = a.value.lastMessage;
-            const y = b.value.lastMessage;
+          users.sort((a, b) => {
+            const x = a.lastMessage;
+            const y = b.lastMessage;
             if (x < y) {
               return 1;
             } else if (x > y) {
@@ -30,15 +26,16 @@ class List {
             return 0;
           });
 
-          for (let i = 0; i < rows.length; i += 1) {
-            const user = rows[i].value;
+          for (let i = 0; i < users.length; i += 1) {
+            const user = users[i];
             list += `#${user.id} '${user.name}' ${Util.timeDiff2Text(Util.UTCTime() - user.lastMessage)}\n`; // eslint-disable-line new-cap
           }
 
           msg.sendMessage({
             text: Util.format(local.list, [list]),
           });
-          this.$updateUserLastMessage(msg.from.id);
+
+          this.DB.$updateUserLastMessage(msg.from.id);
         });
       } else {
         msg.sendMessage({
@@ -47,40 +44,6 @@ class List {
       }
     });
   }
-
-  $checkUserInChat(id) {
-    return new Promise((resolve, reject) => {
-      this.DB.get(
-        'anchat_users',
-        '_design/anchat_users/_view/by_tgid',
-        { key: id })
-      .then(({ data }) => {
-        const rows = data.rows;
-        if (!rows.length || !rows[0].value.isChatUser) {
-          resolve({ isChatUser: false });
-        } else {
-          resolve({ isChatUser: true, UserData: rows[0].value });
-        }
-      }, reject);
-    });
-  }
-
-  $updateUserLastMessage(id) {
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_tgid',
-      { key: id })
-    .then(({ data }) => {
-      const rows = data.rows;
-      const newData = Object.assign(rows[0].value, {
-        _id: rows[0].id,
-        _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
-        lastMessage: Util.UTCTime(), // eslint-disable-line new-cap
-      });
-      this.DB.update('anchat_users', newData);
-    });
-  }
-
 }
 
 module.exports = List;

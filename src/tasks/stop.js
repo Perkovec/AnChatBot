@@ -12,27 +12,18 @@ class Stop {
   }
 
   process(msg) {
-    this.DB.get(
-      'anchat_users',
-      '_design/anchat_users/_view/by_tgid',
-      { key: msg.from.id })
-    .then(({ data }) => {
-      const rows = data.rows;
-      if (rows.length && rows[0].value.isChatUser) {
-        const newData = Object.assign(rows[0].value, {
-          _id: rows[0].id,
-          _rev: rows[0].value._rev, // eslint-disable-line no-underscore-dangle
+    this.DB.$getUserByTgId(msg.from.id)
+    .then(user => {
+      if (user) {
+        this.DB.$updateDocumentFields(user, {
           isChatUser: false,
-        });
-        this.DB.update(
-          'anchat_users',
-          newData)
+        })
         .then(() => {
           msg.sendMessage({
             text: local.stop,
           });
           this.broadcastPlaneMessage.process(
-            Util.format(local.leave_chat, [rows[0].value.name]),
+            Util.format(local.leave_chat, [user.name]),
             msg.from.id
           );
         });
