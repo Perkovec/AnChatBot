@@ -8,7 +8,8 @@ class DBWrapper {
       $getUserByNickname: DBWrapper.$getUserByNickname.bind(db),
       $getUserByChatId: DBWrapper.$getUserByChatId.bind(db),
       $updateDocumentFields: DBWrapper.$updateDocumentFields.bind(db),
-      $updateUserLastMessage: DBWrapper.$updateUserLastMessage.bind(db)
+      $updateUserLastMessage: DBWrapper.$updateUserLastMessage.bind(db),
+      $getRepliesById: DBWrapper.$getRepliesById.bind(db),
     });
   }
 
@@ -71,6 +72,38 @@ class DBWrapper {
         lastMessage: Util.UTCTime(), // eslint-disable-line new-cap
       });
       return this.update('anchat_users', newData);
+    });
+  }
+
+  static $getRepliesById(id) {
+    function findInArray(msgArr, value) {
+      for (let i = 0; i < msgArr.length; i += 1) {
+        if (typeof(msgArr[i]) === 'number' && msgArr[i] == value) {
+          return true;
+        } else if (typeof(msgArr[i]) === 'object') {
+          const keys = Object.keys(msgArr[i]);
+          for (let j = 0; j < keys.length; j += 1) {
+            if (msgArr[i][keys[j]] === value) {
+              return keys[j];
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    return this.get(
+      'anchat_messages',
+      '_design/anchat_messages/_view/by_replyid')
+    .then(({ data }) => {
+      const rows = data.rows;
+      for (let i = 0; i < rows.length; i += 1) {
+        const isInArray = findInArray(rows[i].key, id);
+        if (isInArray) {
+          return (isInArray) === 'string' ? { replies: rows[i].value, reply_key: isInArray } : rows[i].value;
+        }
+      }
+      return null;
     });
   }
 }
