@@ -32,11 +32,14 @@ class Nick {
               .then(() => {
                 msg.sendMessage({
                   text: Util.format(local.new_nick, [nick]),
+                }).then(response => {
+                  this.broadcastPlaneMessage.process(
+                    Util.format(local.new_user_nick, [oldNickname, nick]),
+                    msg.from.id,
+                    null,
+                    { id: msg.from.id, message_id: response.message_id }
+                  );
                 });
-                this.broadcastPlaneMessage.process(
-                  Util.format(local.new_user_nick, [oldNickname, nick]),
-                  msg.from.id
-                );
               });
             } else {
               msg.sendMessage({

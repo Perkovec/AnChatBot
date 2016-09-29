@@ -21,11 +21,15 @@ class Stop {
         .then(() => {
           msg.sendMessage({
             text: local.stop,
+          })
+          .then(response => {
+            this.broadcastPlaneMessage.process(
+              Util.format(local.leave_chat, [user.name]),
+              msg.from.id,
+              null,
+              { id: msg.from.id, message_id: response.message_id }
+            );
           });
-          this.broadcastPlaneMessage.process(
-            Util.format(local.leave_chat, [user.name]),
-            msg.from.id
-          );
         });
       }
     });

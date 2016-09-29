@@ -18,7 +18,8 @@ class Me {
         this.broadcastPlaneMessage.process(
           Util.format(local.me, [user.name, Util.escapeHtml(text)]),
           msg.from.id,
-          'HTML'
+          'HTML',
+          { id: msg.from.id, message_id: msg.message_id }
         );
       } else {
         msg.sendMessage({

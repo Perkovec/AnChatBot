@@ -40,11 +40,15 @@ class Start {
         .then(() => {
           msg.sendMessage({
             text: Util.format(local.start, [user.name]),
+          })
+          .then(response => {
+            this.broadcastPlaneMessage.process(
+              Util.format(local.entry_user, [user.name]),
+              msg.from.id,
+              null,
+              { id: msg.from.id, message_id: response.message_id }
+            );
           });
-          this.broadcastPlaneMessage.process(
-            Util.format(local.entry_user, [user.name]),
-            msg.from.id
-          );
         });
       } else {
         msg.sendMessage({
