@@ -10,7 +10,11 @@ class BroadcastMessage {
   process(msg) {
     this.DB.$getUserByTgId(msg.from.id)
     .then((user) => {
-      if (user && user.isChatUser) {
+      if (user.banned) {
+        msg.sendMessage({
+          text: local.you_are_banned,
+        });
+      } else if (user && user.isChatUser) {
         if (msg.text) {
           this.$sendText(msg, user);
         } else if (msg.audio) {

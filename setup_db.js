@@ -19,7 +19,7 @@ const _design_users = {
       reduce: "function(keys, values, rereduce) {\n  return sum(values);\n}"
     },
     by_isChatUser: {
-      map: "function(doc) {\n  if (doc.isChatUser) {\n    emit(doc.tg_id, doc);\n  }\n}"
+      map: "function(doc) {\n  if (doc.isChatUser && !doc.banned) {\n    emit(doc.tg_id, doc);\n  }\n}"
     }
   }
 };
