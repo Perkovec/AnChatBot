@@ -14,7 +14,11 @@ class Me {
   process(msg, text) {
     this.DB.$getUserByTgId(msg.from.id)
     .then((user) => {
-      if (user && user.isChatUser) {
+      if (user.banned) {
+        msg.sendMessage({
+          text: local.you_are_banned,
+        });
+      } else if (user && user.isChatUser) {
         this.broadcastPlaneMessage.process(
           Util.format(local.me, [user.name, Util.escapeHtml(text)]),
           msg.from.id,

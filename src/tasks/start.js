@@ -32,6 +32,10 @@ class Start {
 
           this.broadcastPlaneMessage.process(Util.format(local.new_user, [nickname]), msg.from.id);
         });
+      } else if (user.banned) {
+        msg.sendMessage({
+          text: local.you_are_banned,
+        });
       } else if (!user.isChatUser) {
         this.DB.$updateDocumentFields(user, {
           isChatUser: true,

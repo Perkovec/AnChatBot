@@ -10,7 +10,11 @@ class Info {
   process(msg, userId) {
     this.DB.$getUserByTgId(msg.from.id)
     .then((user) => {
-      if (user && user.isChatUser) {
+      if (user.banned) {
+        msg.sendMessage({
+          text: local.you_are_banned,
+        });
+      } else if (user && user.isChatUser) {
         if (userId) {
           this.DB.$getUserByChatId(userId.toUpperCase().trim())
           .then((otherUser) => {

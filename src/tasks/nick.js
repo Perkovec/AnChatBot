@@ -14,7 +14,11 @@ class Nick {
   process(msg, newNickname) {
     this.DB.$getUserByTgId(msg.from.id)
     .then((user) => {
-      if (user && user.isChatUser) {
+      if (user.banned) {
+        msg.sendMessage({
+          text: local.you_are_banned,
+        });
+      } else if (user && user.isChatUser) {
         const nick = newNickname.trim();
         if (nick.length < 1) {
           msg.sendMessage({
