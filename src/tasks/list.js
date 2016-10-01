@@ -28,7 +28,7 @@ class List {
 
           for (let i = 0; i < users.length; i += 1) {
             const usr = users[i];
-            const diff = Util.UTCTime() - usr.lastMessage;
+            const diff = Util.UTCTime() - usr.lastMessage; // eslint-disable-line new-cap
             if (diff < 60 * 3) {
               list += Util.format(local.listItemOnline, [usr.id, usr.name]);
             } else {

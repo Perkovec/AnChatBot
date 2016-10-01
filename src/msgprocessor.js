@@ -3,18 +3,6 @@ const local = require('./locals/ru.json');
 const fs = require('fs');
 const path = require('path');
 
-const Start = require('./tasks/start');
-const Stop = require('./tasks/stop');
-const List = require('./tasks/list');
-const Nick = require('./tasks/nick');
-const Help = require('./tasks/help');
-const Kick = require('./tasks/kick');
-const Rename = require('./tasks/rename');
-const Id = require('./tasks/id');
-const Me = require('./tasks/me');
-const BroadcastMessage = require('./tasks/broadcastMessage');
-const BroadcastPlaneMessage = require('./tasks/broadcastPlaneMessage');
-
 const CRegex = {
   some_command: /^\/\w*.*/i,
   start: /^(\/start)$/i,
@@ -41,9 +29,10 @@ class MsgProcessor {
 
   loadPlugins() {
     const fileList = fs.readdirSync(pluginsPath);
-    for (let i = 0; i < fileList.length; ++i) {
-      const plugin = require(path.join(pluginsPath, fileList[i]));
-      this[`$${path.basename(fileList[i], '.js')}`] = new plugin(this.API, this.DB);
+    for (let i = 0; i < fileList.length; i += 1) {
+      const file = fileList[i];
+      const Plugin = require(path.join(pluginsPath, file)); // eslint-disable-line global-require
+      this[`$${path.basename(file, '.js')}`] = new Plugin(this.API, this.DB);
     }
   }
 
