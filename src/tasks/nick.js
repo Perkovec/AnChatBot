@@ -14,7 +14,7 @@ class Nick {
   process(msg, newNickname) {
     this.DB.$getUserByTgId(msg.from.id)
     .then((user) => {
-      if (user) {
+      if (user && user.isChatUser) {
         const nick = newNickname.trim();
         if (nick.length < 1) {
           msg.sendMessage({

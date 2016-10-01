@@ -54,13 +54,16 @@ class API {
 
   polling() {
     const onMessage = this.listeners.onMessage;
+    const onUpdate = this.listeners.onUpdate;
     this.getUpdates({
       offset: this.offset,
     }).then((updates) => {
-      if (onMessage) {
+      if (onMessage || onUpdate) {
         for (const update of updates) {
           if (update.message) {
             onMessage(new Message(update.message, this));
+          } else if (update.edited_message) {
+            onUpdate(new Message(update.edited_message, this));
           } else {
             this.logger.warn(`Unknown update type: ${JSON.stringify(update)}`);
           }
@@ -74,15 +77,12 @@ class API {
     }, this.polling);
   }
 
-  buildMethods() {
-    return {
-      sendMessage: this.sendMessage,
-      getFile: this.getFile,
-    };
-  }
-
   onMessage(listener) {
     this.listeners.onMessage = listener;
+  }
+
+  onUpdate(listener) {
+    this.listeners.onUpdate = listener;
   }
 
   onError(listener) {
@@ -162,6 +162,14 @@ class API {
 
   getFile(data) {
     return this.callMethod('getFile', data);
+  }
+
+  editMessageText(data) {
+    return this.callMethod('editMessageText', data);
+  }
+
+  editMessageCaption(data) {
+    return this.callMethod('editMessageCaption', data);
   }
 }
 

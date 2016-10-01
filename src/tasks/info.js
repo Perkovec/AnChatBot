@@ -8,29 +8,30 @@ class Info {
   }
 
   process(msg, userId) {
-    if (userId) {
-      this.DB.$getUserByChatId(userId.toUpperCase().trim())
-      .then((user) => {
-        if (user) {
-          this.$makeInfo(msg, user);
-        } else {
-          msg.sendMessage({
-            text: local.user_not_found,
+    this.DB.$getUserByTgId(msg.from.id)
+    .then((user) => {
+      if (user && user.isChatUser) {
+        if (userId) {
+          this.DB.$getUserByChatId(userId.toUpperCase().trim())
+          .then((otherUser) => {
+            if (otherUser) {
+              this.$makeInfo(msg, otherUser);
+            } else {
+              msg.sendMessage({
+                text: local.user_not_found,
+              });
+            }
           });
-        }
-      });
-    } else {
-      this.DB.$getUserByTgId(msg.from.id)
-      .then((user) => {
-        if (user) {
-          this.$makeInfo(msg, user);
         } else {
-          msg.sendMessage({
-            text: local.user_not_found,
-          });
+          this.$makeInfo(msg, user);
         }
-      });
-    }
+      } else {
+        msg.sendMessage({
+          text: local.not_in_chat,
+        });
+      }
+    });
+    
   }
 
   $makeInfo(msg, user) {

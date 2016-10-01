@@ -14,7 +14,7 @@ class Me {
   process(msg, text) {
     this.DB.$getUserByTgId(msg.from.id)
     .then((user) => {
-      if (user) {
+      if (user && user.isChatUser) {
         this.broadcastPlaneMessage.process(
           Util.format(local.me, [user.name, Util.escapeHtml(text)]),
           msg.from.id,
@@ -26,6 +26,20 @@ class Me {
           text: local.not_in_chat,
         });
       }
+    });
+  }
+
+  getText(msg, text) {
+    return this.DB.$getUserByTgId(msg.from.id)
+    .then((user) => {
+      if (user) {
+        return Util.format(local.me, [user.name, Util.escapeHtml(text)]);
+      } else {
+        msg.sendMessage({
+          text: local.not_in_chat,
+        });
+      }
+      return null;
     });
   }
 }

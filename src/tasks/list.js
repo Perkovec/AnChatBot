@@ -10,7 +10,7 @@ class List {
   process(msg) {
     this.DB.$getUserByTgId(msg.from.id)
     .then((user) => {
-      if (user) {
+      if (user && user.isChatUser) {
         this.DB.$getChatUsers()
         .then((users) => {
           let list = '';

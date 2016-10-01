@@ -5,6 +5,7 @@ const DBWrapper = require('./src/dbwrapper');
 const TgAPI = require('./src/api/API');
 const config = require('./config.json');
 const MsgProcessor = require('./src/msgprocessor');
+const UpdateProcessor = require('./src/updateprocessor');
 
 const DailyRotateFile = require('winston-daily-rotate-file');
 
@@ -42,8 +43,10 @@ const couch = DBWrapper.wrap(new NodeCouchDb(DBConfig));
 couch.uniqid(1000).then((ids) => {
   couch.ids = ids;
   const OnMsg = new MsgProcessor(API, couch);
+  const OnUpdate = new UpdateProcessor(API, couch);
 
   API.onMessage(msg => OnMsg.process(msg));
+  API.onUpdate(msg => OnUpdate.process(msg));
   API.onError((msg, err) => OnMsg.processError(msg, err));
   API.onReqError((msg, err, name) => {
     OnMsg.processReqError(msg, err);
