@@ -1,13 +1,12 @@
 {
   "token": "1238642344:SAGHJDFHDSGQHNZ621s7iYEu4OhYmMQXZf24", // FAKE TOKEN
-  "webhook": false,
+  "webhook": false, // webhook coming soon...
   "webhook_ip": "127.0.0.1",
   "webhook_port": 8080,
   "certificate_path": "example.pem",
   "couchdb": {
     "host": "localhost",
     "port": "5984",
-    "database": "anchat_users",
     "username": "anchat",
     "password": "anchat"
   }
