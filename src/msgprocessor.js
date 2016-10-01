@@ -1,5 +1,7 @@
 const Util = require('./util');
 const local = require('./locals/ru.json');
+const fs = require('fs');
+const path = require('path');
 
 const Start = require('./tasks/start');
 const Stop = require('./tasks/stop');
@@ -23,25 +25,25 @@ const CRegex = {
   kick: /^(\/kick\s)(.*)/i, // 1 group = "/kick ", 2 group = chat_id
   rename: /^(\/rename)\s(\w*)\s(.*)/i, // 1 group = "/rename ", 2 group = chat_id, 3 group = nick
   id: /^(\/id)\s(\w*)\s(\w*)/i, // 1 group = "/id ", 2 group = chat_id, 3 group = new chat_id
-  me: /^(\/me)\s(.*)/i, // 1 group = "/me ", 2 group = text
+  me: /^(%)(.*)/i, // 1 group = "%", 2 group = text
 };
+
+const pluginsPath = path.join(__dirname, 'tasks');
 
 class MsgProcessor {
   constructor(api, db) {
     this.API = api;
     this.DB = db;
 
-    this.$start = new Start(this.API, this.DB);
-    this.$stop = new Stop(this.API, this.DB);
-    this.$list = new List(this.API, this.DB);
-    this.$nick = new Nick(this.API, this.DB);
-    this.$help = new Help(this.API, this.DB);
-    this.$kick = new Kick(this.API, this.DB);
-    this.$rename = new Rename(this.API, this.DB);
-    this.$id = new Id(this.API, this.DB);
-    this.$me = new Me(this.API, this.DB);
-    this.broadcastMessage = new BroadcastMessage(this.API, this.DB);
-    this.broadcastPlaneMessage = new BroadcastPlaneMessage(this.API, this.DB);
+    this.loadPlugins();
+  }
+
+  loadPlugins() {
+    const fileList = fs.readdirSync(pluginsPath);
+    for (let i = 0; i < fileList.length; ++i) {
+      const plugin = require(path.join(pluginsPath, fileList[i]));
+      this[`$${path.basename(fileList[i], '.js')}`] = new plugin(this.API, this.DB);
+    }
   }
 
   process(msg) {
@@ -67,13 +69,13 @@ class MsgProcessor {
       this.$id.process(msg, matches[2], matches[3]);
     } else if (CRegex.me.test(text)) {
       const matches = text.match(CRegex.me);
-      this.$me.process(msg, matches[2]);
+      this.$me.process(msg, matches[2].trim());
     } else if (CRegex.some_command.test(text)) {
       msg.sendMessage({
         text: local.unknown_command,
       });
     } else {
-      this.broadcastMessage.process(msg);
+      this.$broadcastMessage.process(msg);
     }
   }
 
@@ -97,7 +99,7 @@ class MsgProcessor {
               'anchat_users',
               newData)
             .then(() => {
-              this.broadcastPlaneMessage.process(
+              this.$broadcastPlaneMessage.process(
                 Util.format(local.leave_chat_with_ban, [rows[0].value.name]),
                 msg.chat_id
               );
@@ -129,7 +131,7 @@ class MsgProcessor {
               'anchat_users',
               newData)
             .then(() => {
-              this.broadcastPlaneMessage.process(
+              this.$broadcastPlaneMessage.process(
                 Util.format(local.leave_chat_with_ban, [rows[0].value.name]),
                 msg.chat_id
               );
