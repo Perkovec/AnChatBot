@@ -28,7 +28,12 @@ class List {
 
           for (let i = 0; i < users.length; i += 1) {
             const usr = users[i];
-            list += `#${usr.id} '${usr.name}' ${Util.timeDiff2Text(Util.UTCTime() - usr.lastMessage)}\n`; // eslint-disable-line new-cap
+            const diff = Util.UTCTime() - usr.lastMessage;
+            if (diff < 60 * 3) {
+              list += Util.format(local.listItemOnline, [usr.id, usr.name]);
+            } else {
+              list += Util.format(local.listItem, [usr.id, usr.name, Util.timeDiff(diff)]);
+            }
           }
 
           msg.sendMessage({

@@ -35,21 +35,21 @@ class Util {
     return Math.floor(Date.now() / 1000);
   }
 
-  static timeDiff2Text(diff) {
+  static timeDiff(diff) {
     let text = '';
 
-    if (diff <= 3 * 60) {
-      text = 'онлайн';
+    if (diff <= 60) {
+      text = `${diff} секунд`;
     } else {
       const minutes = Math.floor(diff / 60);
       if (minutes < 60) {
-        text = `был(а) ${minutes} мин. назад`;
+        text = `${minutes} минут`;
       } else {
         const hours = Math.floor(minutes / 60);
         if (hours < 24) {
-          text = `был(а) ${hours} ч. назад`;
+          text = `${hours} часов`;
         } else {
-          text = `был(а) ${Math.floor(hours / 24)} д. назад`;
+          text = `${Math.floor(hours / 24)} дней`;
         }
       }
     }

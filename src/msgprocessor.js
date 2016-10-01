@@ -26,6 +26,7 @@ const CRegex = {
   rename: /^(\/rename)\s(\w*)\s(.*)/i, // 1 group = "/rename ", 2 group = chat_id, 3 group = nick
   id: /^(\/id)\s(\w*)\s(\w*)/i, // 1 group = "/id ", 2 group = chat_id, 3 group = new chat_id
   me: /^(%)(.*)/i, // 1 group = "%", 2 group = text
+  info: /^(\/info)(\s(\w*))?/i, // 1 group = "/info", 2 group = chat_id || undefined
 };
 
 const pluginsPath = path.join(__dirname, 'tasks');
@@ -70,6 +71,8 @@ class MsgProcessor {
     } else if (CRegex.me.test(text)) {
       const matches = text.match(CRegex.me);
       this.$me.process(msg, matches[2].trim());
+    } else if (CRegex.info.test(text)) {
+      this.$info.process(msg, text.match(CRegex.info)[2]);
     } else if (CRegex.some_command.test(text)) {
       msg.sendMessage({
         text: local.unknown_command,
