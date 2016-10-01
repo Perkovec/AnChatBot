@@ -54,6 +54,16 @@ class BroadcastMessage {
     .then((text) => {
       this.DB.$getChatUsers()
       .then((users) => {
+        users.sort((a, b) => {
+          const x = a.lastMessage;
+          const y = b.lastMessage;
+          if (x < y) {
+            return 1;
+          } else if (x > y) {
+            return -1;
+          }
+          return 0;
+        });
         if (data.msg.reply_to_message) {
           this.DB.$getRepliesById(data.msg.reply_to_message.message_id)
           .then((replies) => {

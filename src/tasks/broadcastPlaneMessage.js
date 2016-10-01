@@ -23,6 +23,16 @@ class BroadcastPlaneMessage {
 
     this.DB.$getChatUsers()
     .then((users) => {
+      users.sort((a, b) => {
+        const x = a.lastMessage;
+        const y = b.lastMessage;
+        if (x < y) {
+          return 1;
+        } else if (x > y) {
+          return -1;
+        }
+        return 0;
+      });
       const promises = [];
       for (let i = 0; i < users.length; i += 1) {
         if (users[i].tg_id !== excludeid) {
