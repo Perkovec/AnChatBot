@@ -224,7 +224,7 @@ class BroadcastMessage {
       user,
       template: local.audio_from_user,
       cb(receiver, text, replyId) {
-        return API.sendDocument({
+        return API.sendAudio({
           chat_id: receiver.tg_id,
           audio: msg.audio.file_id,
           caption: text,
