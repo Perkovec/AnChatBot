@@ -20,6 +20,9 @@ const _design_users = {
     },
     by_isChatUser: {
       map: "function(doc) {\n  if (doc.isChatUser && !doc.banned) {\n    emit(doc.tg_id, doc);\n  }\n}"
+    },
+    by_isBanned: {
+      map: "function(doc) {\n  if (doc.banned) {\n    emit(doc.tg_id, doc);\n  }\n}"
     }
   }
 };

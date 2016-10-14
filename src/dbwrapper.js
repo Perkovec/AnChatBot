@@ -5,6 +5,7 @@ class DBWrapper {
     return Object.assign(db, {
       $getUserByTgId: DBWrapper.$getUserByTgId.bind(db),
       $getChatUsers: DBWrapper.$getChatUsers.bind(db),
+      $getBannedUsers: DBWrapper.$getBannedUsers.bind(db),
       $getUserByNickname: DBWrapper.$getUserByNickname.bind(db),
       $getUserByChatId: DBWrapper.$getUserByChatId.bind(db),
       $updateDocumentFields: DBWrapper.$updateDocumentFields.bind(db),
@@ -57,6 +58,17 @@ class DBWrapper {
     return this.get(
       'anchat_users',
       '_design/anchat_users/_view/by_isChatUser')
+    .then(({ data }) => {
+      const rows = data.rows.map(row => row.value);
+
+      return rows;
+    });
+  }
+  
+  static $getBannedUsers() {
+    return this.get(
+      'anchat_users',
+      '_design/anchat_users/_view/by_isBanned')
     .then(({ data }) => {
       const rows = data.rows.map(row => row.value);
 

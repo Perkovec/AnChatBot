@@ -9,9 +9,11 @@ const CRegex = {
   stop: /^(\/stop)$/i,
   help: /^(\/help)$/i,
   list: /^(\/list)$/i,
+  banlist: /^(\/banlist)$/i,
   nick: /^(\/nick\s)(.*)/i, // 1 group = "/nick ", 2 group = nickname
   kick: /^(\/kick\s)(.*)/i, // 1 group = "/kick ", 2 group = chat_id
   ban: /^(\/ban\s)(.*)/i, // 1 group = "/ban ", 2 group = chat_id
+  unban: /^(\/unban\s)(.*)/i, // 1 group = "/unban ", 2 group = chat_id
   rename: /^(\/rename)\s(\w*)\s(.*)/i, // 1 group = "/rename ", 2 group = chat_id, 3 group = nick
   id: /^(\/id)\s(\w*)\s(\w*)/i, // 1 group = "/id ", 2 group = chat_id, 3 group = new chat_id
   me: /^(%)(.*)/i, // 1 group = "%", 2 group = text
@@ -69,6 +71,10 @@ class MsgProcessor {
       this.$info.process(msg, text.match(CRegex.info)[2]);
     } else if (CRegex.ban.test(text)) {
       this.$ban.process(msg, text.match(CRegex.ban)[2]);
+    } else if (CRegex.unban.test(text)) {
+      this.$unban.process(msg, text.match(CRegex.unban)[2]);
+    } else if (CRegex.banlist.test(text)) {
+      this.$banlist.process(msg);
     } else if (CRegex.some_command.test(text)) {
       msg.sendMessage({
         text: local.unknown_command,
