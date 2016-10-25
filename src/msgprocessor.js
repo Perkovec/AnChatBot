@@ -19,6 +19,7 @@ const CRegex = {
   me: /^(%)(.*)/i, // 1 group = "%", 2 group = text
   me2: /^(\/me\s)(.*)/i,
   info: /^(\/info)(\s(\w*))?/i, // 1 group = "/info", 2 group = chat_id || undefined
+  clean: /^(\/clean)$/i,
 };
 
 const pluginsPath = path.join(__dirname, 'tasks');
@@ -75,6 +76,8 @@ class MsgProcessor {
       this.$unban.process(msg, text.match(CRegex.unban)[2]);
     } else if (CRegex.banlist.test(text)) {
       this.$banlist.process(msg);
+    } else if (CRegex.clean.test(text)) {
+      this.$clean.process(msg);
     } else if (CRegex.some_command.test(text)) {
       msg.sendMessage({
         text: local.unknown_command,

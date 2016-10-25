@@ -33,6 +33,9 @@ const _design_messages = {
   views: {
     by_replyid: {
       map: "function(doc) {\nvar keys = Object.keys(doc);\nvar doc_key = [];\nfor(var i = 0; i < keys.length; i += 1){\nif (keys[i] !== '_id' && keys[i] !== '_rev') {\ndoc_key.push(doc[keys[i]]);\n}\n}\nemit(doc_key, doc);\n}"
+    },
+    all: {
+      map: "function(doc) {emit((+doc._id.substr(7)), doc)}"
     }
   }
 };
