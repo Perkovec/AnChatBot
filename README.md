@@ -1,4 +1,7 @@
 # AnChatBot
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/Perkovec/AnChatBot.svg)](https://greenkeeper.io/)
+
 Анонимный чат для телегамма
 ## Установка
 Скопируйте репозиторий и установите зависимости
